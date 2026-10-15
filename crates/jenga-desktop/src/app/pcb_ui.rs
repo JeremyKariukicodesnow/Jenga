@@ -1229,7 +1229,6 @@ impl App {
                     if ctx.input(|i| i.viewport().close_requested()) {
                         open = false;
                     }
-                    #[allow(deprecated)]
                     let assembly_ctx = ctx.clone();
                     egui::CentralPanel::default()
                         .show(ctx, |ui| self.assembly_content(ui, &assembly_ctx));
