@@ -217,7 +217,12 @@ fn exported_copies_are_not_extra_schematics_and_pages_delete_recoverably() {
         .request("create_project", &json!({"name":"House","folder":exact}))
         .unwrap();
     let file = std::path::PathBuf::from(root["file"].as_str().unwrap());
-    assert_eq!(file.parent().unwrap(), exact);
+    // Windows TEMP can use an 8.3 alias while the engine returns its long path.
+    // Compare the actual directory identity without weakening the nesting check.
+    assert_eq!(
+        std::fs::canonicalize(file.parent().unwrap()).unwrap(),
+        std::fs::canonicalize(&exact).unwrap()
+    );
     std::fs::copy(&file, exact.join("House-export.kicad_sch")).unwrap();
     assert_eq!(
         e.request("project_info", &json!({})).unwrap()["pages"]

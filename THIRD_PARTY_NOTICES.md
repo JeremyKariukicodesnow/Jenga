@@ -4,6 +4,8 @@
 
 This inventory identifies observed upstream material; it is not a claim that every native DLL's redistribution obligations have already been fulfilled. The backend preparation script currently copies 208 DLLs from the official local KiCad installation. Exact runtime versions, per-component license texts and matching corresponding-source/rebuild locations must be completed before public binary distribution. See [the public release gate](docs/PUBLIC_RELEASE_CHECKLIST.md). Keep Windows downloads in a draft until that gate is satisfied.
 
+The [machine-generated native inventory](docs/native-runtime-inventory.json) records filenames, hashes, embedded version/copyright metadata for those DLLs and the KiCad CLI executable. Recreate it with `scripts/inventory-native-runtime.ps1`. Its license/source review fields deliberately remain pending; embedded metadata is not a substitute for the applicable license texts and matching sources.
+
 Observed source reuse in this repository includes **KiCad NewStroke font data**, not just compatible file formats. Original notices remain in the included source. The Rust parser, editor and font decoder are maintained as Jenga code; this statement does not prove that every historical line was independently authored. Future copied/adapted code must be identified explicitly, even if translated to another language.
 
 Maintainer/project ownership and AI-development acknowledgements are in [AUTHORS.md](AUTHORS.md); they do not replace upstream copyright attribution or transfer ownership of third-party work.
