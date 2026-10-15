@@ -1,0 +1,15 @@
+/target/
+*.rs.bk
+.DS_Store
+Thumbs.db
+/resources/libraries/symbols/
+/resources/libraries/footprints/
+/resources/libraries/3dmodels/
+/dist/
+/.cache/
+/tools/
+
+/resources/backend/kicad/bin/
+/resources/backend/kicad/share/
+/resources/backend/kicad/*.dll
+/resources/backend/kicad/*.exe

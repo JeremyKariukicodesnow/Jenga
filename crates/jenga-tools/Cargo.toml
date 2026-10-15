@@ -1,0 +1,24 @@
+[package]
+name = "jenga-tools"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "jenga-cli"
+path = "src/main.rs"
+
+[dependencies]
+tempfile.workspace = true
+jenga-core = { path = "../jenga-core" }
+jenga-libraries = { path = "../jenga-libraries" }
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml = "1.1"
+uuid.workspace = true
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[dev-dependencies]
+tempfile.workspace = true
