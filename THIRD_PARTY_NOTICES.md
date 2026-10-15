@@ -1,0 +1,23 @@
+# Third-party notices
+
+Jenga bundles official KiCad symbols and footprints from the local KiCad 10.0 installation in release packages. Exact payload hashes and provenance are recorded in resources/libraries. 3D models are excluded.
+
+Jenga embeds the unmodified KiCad NewStroke font data from tag 10.0.0, common/newstroke_font.cpp. Copyright (C) 2010 Vladimir Uryvaev and the KiCad developers. The file is GPL-2.0-or-later with additional MIT and SIL Open Font License notices for CJK data; all notices remain in resources/fonts/newstroke_font.cpp, accompanied by GPL-2.0.txt and upstream AUTHORS.txt. The Rust font decoder is Jenga's implementation. Upstream: https://github.com/KiCad/kicad-source-mirror/blob/10.0.0/common/newstroke_font.cpp
+
+Rust dependencies keep their upstream licenses. Release packages include a generated dependency inventory and bundled dependency source/licenses alongside Jenga source.
+
+Before adding third-party material, record its origin, version or commit, applicable license, copyright notices, and modifications, and include required license texts.
+
+## KiCad source
+
+Most KiCad source is GPL-3.0-or-later. Individual files and dependencies may carry other terms; inspect the exact material before reuse. Preserve attribution and license notices, identify modifications, and satisfy corresponding-source requirements when distributing covered binaries. Translating covered C++ code into Rust does not remove its licensing obligations.
+
+Source license information: https://www.kicad.org/about/licenses/
+
+## KiCad libraries
+
+Official KiCad libraries use CC-BY-SA-4.0 with the KiCad libraries exception. When bundling them, retain the license, exception, attribution, and applicable share-alike obligations for library adaptations. The exception permits use of library data in commercial, closed, and non-commercial designs; library redistribution remains subject to its terms.
+
+Third-party or locally installed libraries may use different licenses. Discovering a local library does not grant permission to redistribute it.
+
+Library license and exception: https://www.kicad.org/libraries/license/

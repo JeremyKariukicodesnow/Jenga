@@ -1,0 +1,577 @@
+//! A shared millimetre-space scene for the canvas and vector exports.
+use crate::{
+    document::{Document, position, property},
+    sexpr::Node,
+};
+
+pub type Point = (f64, f64);
+pub const BODY: [u8; 3] = [132, 0, 0];
+pub const WIRE: [u8; 3] = [0, 132, 0];
+pub const TEXT: [u8; 3] = [0, 83, 130];
+#[derive(Clone, Debug)]
+pub enum Shape {
+    Path {
+        points: Vec<Point>,
+        closed: bool,
+        fill: Option<[u8; 3]>,
+        color: [u8; 3],
+        width: f64,
+    },
+    Circle {
+        center: Point,
+        radius: f64,
+        fill: Option<[u8; 3]>,
+        color: [u8; 3],
+        width: f64,
+    },
+    Text {
+        at: Point,
+        text: String,
+        size: f64,
+        angle: f64,
+        color: [u8; 3],
+        left: bool,
+    },
+}
+#[derive(Clone, Debug)]
+pub struct Draw {
+    pub shape: Shape,
+    pub object: Option<usize>,
+}
+#[derive(Clone, Debug)]
+pub struct Pin {
+    pub at: Point,
+    pub reference: String,
+    pub number: String,
+    pub kind: String,
+    pub object: usize,
+}
+#[derive(Default, Clone)]
+pub struct Scene {
+    pub draws: Vec<Draw>,
+    pub pins: Vec<Pin>,
+    pub missing: Vec<String>,
+}
+impl Shape {
+    pub fn bounds(&self) -> (Point, Point) {
+        match self {
+            Shape::Path { points, .. } => bounds(points),
+            Shape::Circle {
+                center: (x, y),
+                radius: r,
+                ..
+            } => ((*x - r, *y - r), (*x + r, *y + r)),
+            Shape::Text {
+                at: (x, y),
+                text,
+                size,
+                left,
+                ..
+            } => {
+                let w = text.chars().count() as f64 * size * 0.65;
+                let x0 = if *left { *x } else { *x - w / 2. };
+                ((x0, *y - size), (x0 + w, *y + size))
+            }
+        }
+    }
+}
+pub fn bounds(points: &[Point]) -> (Point, Point) {
+    let mut min = (f64::INFINITY, f64::INFINITY);
+    let mut max = (f64::NEG_INFINITY, f64::NEG_INFINITY);
+    for &(x, y) in points {
+        min.0 = min.0.min(x);
+        min.1 = min.1.min(y);
+        max.0 = max.0.max(x);
+        max.1 = max.1.max(y);
+    }
+    (min, max)
+}
+impl Scene {
+    pub fn from_document(doc: &Document) -> Self {
+        let mut scene = Self::default();
+        for (index, n) in doc.root.items().iter().enumerate().skip(1) {
+            let object = Some(index);
+            match n.name() {
+                "wire" | "bus" | "polyline" => {
+                    let points = points(n, "pts");
+                    let color = if n.name() == "wire" { WIRE } else { TEXT };
+                    scene.path(points, false, None, color, 0.15, object);
+                }
+                "junction" => {
+                    let (x, y, _) = position(n);
+                    scene.circle(
+                        (x, y),
+                        n.child("diameter")
+                            .map(|d| d.number(1))
+                            .filter(|d| *d > 0.)
+                            .unwrap_or(0.9)
+                            / 2.,
+                        Some(WIRE),
+                        WIRE,
+                        0.1,
+                        object,
+                    );
+                }
+                "no_connect" => {
+                    let (x, y, _) = position(n);
+                    scene.path(
+                        vec![(x - 0.6, y - 0.6), (x + 0.6, y + 0.6)],
+                        false,
+                        None,
+                        TEXT,
+                        0.15,
+                        object,
+                    );
+                    scene.path(
+                        vec![(x - 0.6, y + 0.6), (x + 0.6, y - 0.6)],
+                        false,
+                        None,
+                        TEXT,
+                        0.15,
+                        object,
+                    );
+                }
+                "label" | "global_label" | "hierarchical_label" | "text" => {
+                    scene.node_text(n, n.value(1), TEXT, object);
+                }
+                "symbol" => {
+                    let lib_id = n.child("lib_id").map(|n| n.value(1)).unwrap_or("");
+                    if let Some(def) = doc.instance_definition(n) {
+                        scene.symbol(def, n, index);
+                    } else {
+                        scene.missing.push(lib_id.to_owned());
+                        let (x, y, _) = position(n);
+                        scene.path(
+                            vec![
+                                (x - 3., y - 3.),
+                                (x + 3., y - 3.),
+                                (x + 3., y + 3.),
+                                (x - 3., y + 3.),
+                            ],
+                            true,
+                            None,
+                            BODY,
+                            0.3,
+                            object,
+                        );
+                        scene.text(
+                            (x, y),
+                            format!("Missing {lib_id}"),
+                            1.,
+                            0.,
+                            BODY,
+                            false,
+                            object,
+                        );
+                    }
+                    for p in n.children("property") {
+                        if !hidden(p) {
+                            scene.node_text(p, p.value(2), TEXT, object);
+                        }
+                    }
+                }
+                "sheet" => {
+                    let (x, y, _) = position(n);
+                    let size = n
+                        .child("size")
+                        .map(|s| (s.number(1), s.number(2)))
+                        .unwrap_or((20., 15.));
+                    scene.path(
+                        vec![
+                            (x, y),
+                            (x + size.0, y),
+                            (x + size.0, y + size.1),
+                            (x, y + size.1),
+                        ],
+                        true,
+                        None,
+                        TEXT,
+                        0.2,
+                        object,
+                    );
+                    scene.text(
+                        (x + 1., y + 2.),
+                        property(n, "Sheetname").to_owned(),
+                        1.27,
+                        0.,
+                        TEXT,
+                        true,
+                        object,
+                    );
+                }
+                _ => {}
+            }
+        }
+        scene
+    }
+    pub fn symbol_preview(def: &Node) -> Self {
+        let mut doc = Document::new();
+        doc.add_symbol("preview:Symbol", def, 0., 0., 1);
+        Self::from_document(&doc)
+    }
+    fn symbol(&mut self, def: &Node, instance: &Node, index: usize) {
+        let (x, y, angle) = position(instance);
+        let a = angle.to_radians();
+        let unit = instance
+            .child("unit")
+            .map(|n| n.number(1) as i32)
+            .unwrap_or(1);
+        let mirror = instance.child("mirror").map(|n| n.value(1)).unwrap_or("");
+        let transform = |p: Point| {
+            let (mut px, mut py) = p;
+            if mirror == "x" {
+                py = -py;
+            }
+            if mirror == "y" {
+                px = -px;
+            }
+            (
+                x + px * a.cos() - py * a.sin(),
+                y - px * a.sin() - py * a.cos(),
+            )
+        };
+        let obj = Some(index);
+        let names_hidden = def.child("pin_names").is_some_and(hidden);
+        let numbers_hidden = def.child("pin_numbers").is_some_and(hidden);
+        let offset = def
+            .child("pin_names")
+            .and_then(|n| n.child("offset"))
+            .map(|n| n.number(1))
+            .unwrap_or(0.508);
+        for block in def.children("symbol") {
+            let parts: Vec<_> = block.value(1).rsplit('_').take(2).collect();
+            let block_unit = parts
+                .get(1)
+                .and_then(|s| s.parse::<i32>().ok())
+                .unwrap_or(0);
+            let style = parts
+                .first()
+                .and_then(|s| s.parse::<i32>().ok())
+                .unwrap_or(0);
+            if block_unit != 0 && block_unit != unit || style > 1 {
+                continue;
+            }
+            for g in block.items().iter().skip(2) {
+                let width = g
+                    .child("stroke")
+                    .and_then(|n| n.child("width"))
+                    .map(|n| n.number(1))
+                    .filter(|v| *v > 0.)
+                    .unwrap_or(0.15);
+                let fill =
+                    g.child("fill")
+                        .and_then(|n| n.child("type"))
+                        .and_then(|t| match t.value(1) {
+                            "background" => Some([255, 255, 194]),
+                            "outline" => Some(BODY),
+                            _ => None,
+                        });
+                match g.name() {
+                    "rectangle" => {
+                        let p = coords(g, "start");
+                        let q = coords(g, "end");
+                        self.path(
+                            vec![
+                                transform(p),
+                                transform((q.0, p.1)),
+                                transform(q),
+                                transform((p.0, q.1)),
+                            ],
+                            true,
+                            fill,
+                            BODY,
+                            width,
+                            obj,
+                        );
+                    }
+                    "polyline" => {
+                        let ps = points(g, "pts").into_iter().map(transform).collect();
+                        self.path(ps, fill.is_some(), fill, BODY, width, obj);
+                    }
+                    "circle" => self.circle(
+                        transform(coords(g, "center")),
+                        g.child("radius").map(|n| n.number(1)).unwrap_or(1.),
+                        fill,
+                        BODY,
+                        width,
+                        obj,
+                    ),
+                    "arc" => {
+                        let ps = arc_points(coords(g, "start"), coords(g, "mid"), coords(g, "end"));
+                        self.path(
+                            ps.into_iter().map(transform).collect(),
+                            false,
+                            fill,
+                            BODY,
+                            width,
+                            obj,
+                        );
+                    }
+                    "bezier" => {
+                        let ps = points(g, "pts");
+                        if ps.len() == 4 {
+                            let curve = (0..=32)
+                                .map(|i| {
+                                    let t = i as f64 / 32.;
+                                    let u = 1. - t;
+                                    transform((
+                                        u * u * u * ps[0].0
+                                            + 3. * u * u * t * ps[1].0
+                                            + 3. * u * t * t * ps[2].0
+                                            + t * t * t * ps[3].0,
+                                        u * u * u * ps[0].1
+                                            + 3. * u * u * t * ps[1].1
+                                            + 3. * u * t * t * ps[2].1
+                                            + t * t * t * ps[3].1,
+                                    ))
+                                })
+                                .collect();
+                            self.path(curve, false, fill, BODY, width, obj);
+                        }
+                    }
+                    "text" => {
+                        let (tx, ty, ta) = position(g);
+                        self.text(
+                            transform((tx, ty)),
+                            g.value(1).into(),
+                            font_size(g),
+                            ta + angle,
+                            BODY,
+                            false,
+                            obj,
+                        );
+                    }
+                    "pin" => {
+                        let (px, py, pa) = position(g);
+                        let length = g.child("length").map(|n| n.number(1)).unwrap_or(2.54);
+                        let pa = pa.to_radians();
+                        let p = (px, py);
+                        let q = (px + length * pa.cos(), py + length * pa.sin());
+                        let start = transform(p);
+                        let end = transform(q);
+                        self.pins.push(Pin {
+                            at: start,
+                            reference: property(instance, "Reference").into(),
+                            number: g.child("number").map(|n| n.value(1)).unwrap_or("").into(),
+                            kind: g.value(1).into(),
+                            object: index,
+                        });
+                        if hidden(g) {
+                            continue;
+                        }
+                        self.path(vec![start, end], false, None, BODY, 0.15, obj);
+                        let style = g.value(2);
+                        if style.contains("inverted") {
+                            self.circle(end, 0.45, None, BODY, 0.15, obj);
+                        }
+                        if style.contains("clock") {
+                            let dx = pa.cos();
+                            let dy = pa.sin();
+                            self.path(
+                                vec![
+                                    transform((q.0 - dy * 0.6, q.1 + dx * 0.6)),
+                                    transform((q.0 + dx * 0.9, q.1 + dy * 0.9)),
+                                    transform((q.0 + dy * 0.6, q.1 - dx * 0.6)),
+                                ],
+                                false,
+                                None,
+                                BODY,
+                                0.15,
+                                obj,
+                            );
+                        }
+                        if !numbers_hidden && let Some(number) = g.child("number") {
+                            self.text(
+                                transform((
+                                    (p.0 + q.0) / 2. - pa.sin() * 0.6,
+                                    (p.1 + q.1) / 2. + pa.cos() * 0.6,
+                                )),
+                                number.value(1).into(),
+                                font_size(number).min(1.27),
+                                0.,
+                                BODY,
+                                false,
+                                obj,
+                            );
+                        }
+                        if !names_hidden
+                            && let Some(name) = g.child("name")
+                            && name.value(1) != "~"
+                        {
+                            self.text(
+                                transform((q.0 + offset * pa.cos(), q.1 + offset * pa.sin())),
+                                name.value(1).into(),
+                                font_size(name).min(1.27),
+                                0.,
+                                TEXT,
+                                true,
+                                obj,
+                            );
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+    fn node_text(&mut self, n: &Node, text: &str, color: [u8; 3], object: Option<usize>) {
+        let (x, y, a) = position(n);
+        let left = n
+            .child("effects")
+            .and_then(|e| e.child("justify"))
+            .is_some_and(|j| j.items().iter().any(|v| v.text() == "left"));
+        self.text(
+            (x, y),
+            text.replace("~{", "").replace('}', ""),
+            font_size(n),
+            a,
+            color,
+            left,
+            object,
+        );
+    }
+    // Scene builders keep geometry, appearance and document identity together.
+    #[allow(clippy::too_many_arguments)]
+    pub fn text(
+        &mut self,
+        at: Point,
+        text: String,
+        size: f64,
+        angle: f64,
+        color: [u8; 3],
+        left: bool,
+        object: Option<usize>,
+    ) {
+        let a = angle.to_radians();
+        for stroke in crate::font::paths(&text, size, left) {
+            let points = stroke
+                .into_iter()
+                .map(|(x, y)| {
+                    (
+                        at.0 + x * a.cos() + y * a.sin(),
+                        at.1 - x * a.sin() + y * a.cos(),
+                    )
+                })
+                .collect();
+            self.path(points, false, None, color, size * 0.1, object);
+        }
+    }
+    pub fn path(
+        &mut self,
+        points: Vec<Point>,
+        closed: bool,
+        fill: Option<[u8; 3]>,
+        color: [u8; 3],
+        width: f64,
+        object: Option<usize>,
+    ) {
+        if points.len() > 1 {
+            self.draws.push(Draw {
+                shape: Shape::Path {
+                    points,
+                    closed,
+                    fill,
+                    color,
+                    width,
+                },
+                object,
+            });
+        }
+    }
+    pub fn circle(
+        &mut self,
+        center: Point,
+        radius: f64,
+        fill: Option<[u8; 3]>,
+        color: [u8; 3],
+        width: f64,
+        object: Option<usize>,
+    ) {
+        self.draws.push(Draw {
+            shape: Shape::Circle {
+                center,
+                radius,
+                fill,
+                color,
+                width,
+            },
+            object,
+        });
+    }
+    pub fn object_bounds(&self, index: usize) -> Option<(Point, Point)> {
+        let mut ps = vec![];
+        for draw in self.draws.iter().filter(|d| d.object == Some(index)) {
+            let (a, b) = draw.shape.bounds();
+            ps.extend([a, b]);
+        }
+        if ps.is_empty() {
+            None
+        } else {
+            Some(bounds(&ps))
+        }
+    }
+    pub fn content_bounds(&self) -> (Point, Point) {
+        let mut ps = vec![];
+        for d in &self.draws {
+            let (a, b) = d.shape.bounds();
+            ps.extend([a, b]);
+        }
+        if ps.is_empty() {
+            ((0., 0.), (297., 210.))
+        } else {
+            bounds(&ps)
+        }
+    }
+}
+pub fn hidden(n: &Node) -> bool {
+    n.items().iter().any(|v| v.text() == "hide")
+        || n.child("hide").is_some_and(|h| h.value(1) != "no")
+        || n.child("effects").is_some_and(hidden)
+}
+pub fn font_size(n: &Node) -> f64 {
+    n.child("effects")
+        .and_then(|e| e.child("font"))
+        .and_then(|f| f.child("size"))
+        .map(|s| s.number(2))
+        .filter(|s| *s > 0.)
+        .unwrap_or(1.27)
+}
+pub fn coords(n: &Node, key: &str) -> Point {
+    n.child(key)
+        .map(|p| (p.number(1), p.number(2)))
+        .unwrap_or_default()
+}
+pub fn points(n: &Node, key: &str) -> Vec<Point> {
+    n.child(key)
+        .map(|pts| {
+            pts.children("xy")
+                .map(|p| (p.number(1), p.number(2)))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+pub fn arc_points(a: Point, b: Point, c: Point) -> Vec<Point> {
+    let d = 2. * (a.0 * (b.1 - c.1) + b.0 * (c.1 - a.1) + c.0 * (a.1 - b.1));
+    if d.abs() < 1e-9 {
+        return vec![a, b, c];
+    }
+    let sq = |p: Point| p.0 * p.0 + p.1 * p.1;
+    let center = (
+        (sq(a) * (b.1 - c.1) + sq(b) * (c.1 - a.1) + sq(c) * (a.1 - b.1)) / d,
+        (sq(a) * (c.0 - b.0) + sq(b) * (a.0 - c.0) + sq(c) * (b.0 - a.0)) / d,
+    );
+    let angle = |p: Point| (p.1 - center.1).atan2(p.0 - center.0);
+    let start = angle(a);
+    let tau = std::f64::consts::TAU;
+    let mut sweep = (angle(c) - start).rem_euclid(tau);
+    if (angle(b) - start).rem_euclid(tau) > sweep {
+        sweep -= tau;
+    }
+    let r = ((a.0 - center.0).powi(2) + (a.1 - center.1).powi(2)).sqrt();
+    (0..=48)
+        .map(|i| {
+            let t = start + sweep * i as f64 / 48.;
+            (center.0 + r * t.cos(), center.1 + r * t.sin())
+        })
+        .collect()
+}
