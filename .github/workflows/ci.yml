@@ -21,6 +21,10 @@ jobs:
         run: rustup update stable
       - name: Formatting
         run: cargo fmt --all --check
+      - name: Published release download selection
+        run: node --test scripts/test-release-links.mjs
+      - name: Download alias integrity
+        run: ./scripts/test-download-aliases.ps1
       - name: Tests
         run: cargo test --workspace --locked
       - name: Release executable
