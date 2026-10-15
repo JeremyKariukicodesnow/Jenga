@@ -1,0 +1,10 @@
+/target/
+*.rs.bk
+.DS_Store
+Thumbs.db
+/resources/libraries/symbols/
+/resources/libraries/footprints/
+/resources/libraries/3dmodels/
+/dist/
+/.cache/
+/tools/
