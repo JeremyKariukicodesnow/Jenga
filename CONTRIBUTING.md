@@ -2,6 +2,8 @@
 
 Thank you for helping improve Jenga. Jeremy (@JeremyKariukicodesnow) maintains upstream and decides which changes are merged and released.
 
+Use Rust 1.95 or newer (the GUI dependency minimum), Node.js for the download tests, and PowerShell for packaging tests.
+
 1. Check existing issues. Discuss substantial changes before implementation.
 2. Fork the repository; branch from main. Keep changes focused and explain the user-visible problem.
 3. Preserve native unknown fields, UUID identity, wiring/net membership and human edits. Never hide errors by dropping objects or replaying uncertain mutations.
