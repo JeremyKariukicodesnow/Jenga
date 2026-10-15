@@ -11,7 +11,7 @@ try {
   const model = await load(fetch, controller.signal);
   if (model.state === 'empty') {
     get('download-heading').textContent = 'Public installer not available yet';
-    get('status').textContent = 'The 0.8.0 Windows binaries remain in draft pending the redistribution review. Source code and release status are public.';
+    get('status').textContent = 'No published installer was found. Source code and release history remain available; use All releases to check the current status.';
   } else {
     const {release} = model;
     const selectedVersion = version(release.tag_name);

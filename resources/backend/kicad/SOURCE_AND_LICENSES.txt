@@ -6,3 +6,7 @@ Windows dependency build recipes: https://gitlab.com/kicad/packaging/kicad-win-b
 OpenCascade source: https://github.com/Open-Cascade-SAS/OCCT
 wxWidgets source: https://github.com/wxWidgets/wxWidgets
 Official component 3D libraries are included separately in libraries/3dmodels under the KiCad library license and exception; see libraries/licenses and manifest.json.
+
+Exact 10.0.6 native source commit: caf7377e9cb6fa1535ec3596dcb8c99bf44a996e.
+The NOTICES-SOURCES.zip supplement identifies 209 native files and 40 components with retained upstream notices, pinned source/access URLs and selected build recipes. Microsoft platform runtimes retain separate terms.
+Future packaging verifies the complete runtime against that inventory and includes this supplement in both app and source packages. The preserved original 0.7/0.8 installers receive it as a separate release asset.

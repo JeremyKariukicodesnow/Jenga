@@ -32,11 +32,12 @@ foreach ($asset in @('assistant-skill','examples','fonts','branding')) {
 if (-not (Test-Path -LiteralPath 'resources\backend\kicad\bin\kicad-cli.exe')) {
     & (Join-Path $PSScriptRoot 'prepare-pcb-backend.ps1')
 }
+& (Join-Path $PSScriptRoot 'verify-native-notices.ps1')
 foreach ($sub in @('bin','share')) {
     & robocopy "resources\backend\kicad\$sub" "$payload\backend\kicad\$sub" /E /NFL /NDL /NJH /NJS /NP | Out-Null
     if ($LASTEXITCODE -gt 7) {throw 'Native backend payload copy failed'}
 }
-foreach ($file in @('COPYRIGHT.txt','SOURCE_AND_LICENSES.txt')) {Copy-Item -LiteralPath "resources\backend\kicad\$file" -Destination "$payload\backend\kicad"}
+foreach ($file in @('COPYRIGHT.txt','SOURCE_AND_LICENSES.txt','NOTICES-SOURCES.zip')) {Copy-Item -LiteralPath "resources\backend\kicad\$file" -Destination "$payload\backend\kicad"}
 Copy-Item -LiteralPath 'docs\PCB_GUIDE.md' -Destination $payload
 Copy-Item -LiteralPath 'resources\DEPENDENCIES.txt' -Destination $payload
 if ($LinkLibraries -and -not ('JengaPackaging.NativeFiles' -as [type])) {
@@ -112,6 +113,8 @@ foreach ($name in @('crates','scripts','packaging','docs','.cargo','.github','re
         Copy-Item -LiteralPath 'resources\fonts' -Destination "$sourceDir\resources" -Recurse -Force
         Copy-Item -LiteralPath 'resources\branding' -Destination "$sourceDir\resources" -Recurse -Force
         Copy-Item -LiteralPath 'resources\DEPENDENCIES.txt' -Destination "$sourceDir\resources" -Force
+        New-Item -ItemType Directory -Force -Path "$sourceDir\resources\backend\kicad" | Out-Null
+        foreach ($notice in @('COPYRIGHT.txt','SOURCE_AND_LICENSES.txt','NOTICES-SOURCES.zip')) {Copy-Item -LiteralPath "resources\backend\kicad\$notice" -Destination "$sourceDir\resources\backend\kicad" -Force}
     } else {Copy-Item -LiteralPath $name -Destination $sourceDir -Recurse -Force}
 }
 foreach ($file in @('Cargo.toml','Cargo.lock','LICENSE','README.md','THIRD_PARTY_NOTICES.md','CHANGELOG.md','.gitignore')) {Copy-Item -LiteralPath $file -Destination $sourceDir -Force}

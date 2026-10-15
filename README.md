@@ -17,19 +17,20 @@ Created and maintained by **Jeremy ([@JeremyKariukicodesnow](https://github.com/
 
 **0.8.0 is early-access software for Windows x64.** It is suitable for evaluation and contributions; it is not a guarantee of production-ready PCB designs. Save backups, inspect exports and run native ERC/DRC before relying on a design. Electrical, thermal, mechanical and bench validation remain the designer's responsibility.
 
-[Download latest Windows installer](https://jeremykariukicodesnow.github.io/Jenga/download/?start=1) · [Older versions / all releases](https://github.com/JeremyKariukicodesnow/Jenga/releases) · [Latest stable release](https://github.com/JeremyKariukicodesnow/Jenga/releases/latest) · [User guide](docs/USER_GUIDE.md) · [PCB guide](docs/PCB_GUIDE.md) · [Validation evidence and limits](docs/RELEASE_080_VALIDATION.md)
+[Download latest Windows installer](https://jeremykariukicodesnow.github.io/Jenga/download/?start=1) · [Older versions / all releases](https://github.com/JeremyKariukicodesnow/Jenga/releases) · [0.8.0 early-access release](https://github.com/JeremyKariukicodesnow/Jenga/releases/tag/v0.8.0) · [User guide](docs/USER_GUIDE.md) · [PCB guide](docs/PCB_GUIDE.md) · [Validation evidence and limits](docs/RELEASE_080_VALIDATION.md)
 
-**One permanent download link:** https://jeremykariukicodesnow.github.io/Jenga/download/?start=1 selects the highest published version, including early-access builds, and starts its EXE download. While no public installer exists, it explains the release hold instead. [Older versions](https://github.com/JeremyKariukicodesnow/Jenga/releases) stay available separately once published; new releases never replace their original assets.
+**One permanent download link:** https://jeremykariukicodesnow.github.io/Jenga/download/?start=1 selects the highest published version, including early-access builds, and starts its EXE download. The public 0.8.0 early-access EXE is available now. [Older versions](https://github.com/JeremyKariukicodesnow/Jenga/releases) remain available separately; new releases never replace their original assets.
 
-**GitHub-native stable download links — not active while releases remain draft:**
+**Direct 0.8.0 downloads:**
 
-- [Windows installer (.exe), latest stable](https://github.com/JeremyKariukicodesnow/Jenga/releases/latest/download/Jenga-windows-x64-Setup.exe)
-- [Portable ZIP, latest stable](https://github.com/JeremyKariukicodesnow/Jenga/releases/latest/download/Jenga-windows-x64-portable.zip)
-- [Checksums, latest stable](https://github.com/JeremyKariukicodesnow/Jenga/releases/latest/download/SHA256SUMS)
+- [Windows installer (.exe)](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.0/Jenga-windows-x64-Setup.exe)
+- [Matching original source and Rust dependency source](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.0/Jenga-0.8.0-source.zip)
+- [Checksums](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.0/SHA256SUMS)
+- [Native runtime notices and source/build access](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.0/Jenga-native-10.0.6-NOTICES-SOURCES.zip)
 
-Use the permanent download-page link for the newest published build, including previews. The GitHub-native fixed links below it are for stable releases only. GitHub's latest-stable endpoint excludes prereleases; use **All releases and previews** for published early-access builds. See [sharing links and adding videos](docs/SHARING_AND_VIDEOS.md) for preview links, website HTML and video guidance. No demo video is uploaded yet.
+Use the permanent download-page link for the newest published build, including previews. The version-specific links above keep the original 0.8.0 files. GitHub's `/latest` endpoint excludes prereleases; the [sharing/video guide](docs/SHARING_AND_VIDEOS.md) explains website buttons and future stable-release links. No demo video is uploaded yet.
 
-The local build produces an installer, portable ZIP, corresponding Jenga/Rust dependency source ZIP and SHA-256 checksums. **Public binary downloads are held pending the third-party redistribution checklist** in [PUBLIC_RELEASE_CHECKLIST.md](docs/PUBLIC_RELEASE_CHECKLIST.md). A draft release is not a public download. Do not use a source snapshot as an installer or treat an unlisted third-party download as an official build.
+The local build produces an installer, portable ZIP, corresponding Jenga/Rust dependency source ZIP and SHA-256 checksums. **The public [0.8.0 early-access release](https://github.com/JeremyKariukicodesnow/Jenga/releases/tag/v0.8.0) includes its installer, matching original source, checksums and a native-runtime notice/source supplement.** Published release artifacts are frozen; repository main can contain later dependency/CI/documentation changes. See [publication evidence and future release checks](docs/PUBLIC_RELEASE_CHECKLIST.md). Portable archives are available only where explicitly attached to a release. Do not use a source snapshot as an installer or treat an unlisted third-party download as an official build.
 
 The complete Windows package includes symbols, footprints, 3D library data and the native KiCad backend; a separate KiCad installation is not required. This makes the offline package relatively large. Windows binaries are currently unsigned; there is no automatic online updater or established security audit.
 
