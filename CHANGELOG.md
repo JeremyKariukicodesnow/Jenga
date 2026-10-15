@@ -1,0 +1,46 @@
+# Changelog
+
+## 0.4.0 — 2026-10-12
+
+- Independently scrolling compact Components list with a fixed placement-tools footer; Select and Move remain visible.
+- Real Excel (.xlsx) BOM export with frozen header and filters, plus native schematic copy export in File/Export and external tools.
+- Home Connect Assistant page: reviewed snippets, user-wide registration for Codex/Claude Code/Cursor/Antigravity, headless/live modes, connection-kit export and optional Jenga skill.
+- Human Help page and machine-readable CLI/MCP help with capability schemas; 33 MCP operations.
+- Animated dot-matrix Jenga write/hold/dissolve cycle, background dot waves, rings and travelling circuit signals.
+- Assistant setup preserves unrelated settings and backs up JSON/TOML config; conflicting entries and existing skills are not overwritten.
+- Windows Connect Assistant shortcut; installer upgrade identity preserved. No models, chat, PCB editing or 3D assets added.
+
+
+## 0.3.0 — 2026-10-12
+
+- Slimmer default panels, compact monospaced controls, solid dot-matrix lettering, bright adaptive grids and clickable project cards with animated hover lift.
+- Subtle animated rings/dots on the project workspace and a breathing Jenga-logo loading state. Colored native schematic previews are retained.
+- Editable native page/title metadata: title, company, date, revision and nine comments; shared worksheet zones/cells across the canvas and exports.
+- ERC repair suggestions, UUIDs, precise locations and pulsing navigation markers; improved repeated/hidden power pin connectivity.
+- Separate jenga-cli executable: headless CLI, MCP stdio, JSON-line control, authenticated loopback desktop connection, state inspection, pointer control and real/offscreen screenshots.
+- Transactional document edits with revision guards, pin-aware wire stubs, placements, labels, text, no-connects, page metadata and attributed before/after history.
+- Native project/schematic renaming with collision checks, UUID preservation and optional folder moves; guarded library authoring and fitted colored previews.
+- Native symbol/footprint imports with project registration and provenance, recursive project inspection, batch recipes and dry runs.
+- Installer/portable package include tools and client configuration examples. No built-in AI interface, model service, subscriptions or 3D assets.
+
+Current limits remain documented: single-sheet ERC, default worksheet only, modern native formats, no PCB or obstacle-avoiding autorouting.
+
+## 0.2.0 — 2026-10-12
+
+- Bright cream workspace, red accents, original dot lettering, outlined toolbar icons and the supplied Jenga logo.
+- Project cards preview real KiCad schematic geometry; previews are cached and refreshed when files change.
+- Search all indexed symbols by name, description, inherited keywords and footprint. Browse grouped libraries, filter a library and display every matching result.
+- Symbol/unit and 2D footprint previews, searchable footprint assignment and Select-to-place workflow. Selected imported components preview their embedded definition.
+- Placed-components palette, optional repeated copies, cursor rotation, cancellation and automatic field positioning. Multi-unit placement shares references when a previous unit is available.
+- Correct pin label alignment and ghost drawing without erasing underlying circuitry.
+- ERC issue counts, severity filtering and navigation; additional power-driver, input-driver, net-name and detached-marker checks.
+- Consistent page frames in the canvas, PDF and SVG, paper-size-aware export, missing-symbol guards and one BOM row per multi-unit component.
+- Same Windows upgrade identity and per-user settings location. Symbols and footprints bundled; 3D models excluded.
+
+Still an early release: legacy .sch import, full hierarchical ERC, PCB editing and automatic online updates are not available.
+
+## 0.1.0 — 2026-10-12
+
+Initial preview: Rust project manager and single-sheet schematic editor; modern KiCad file I/O preserving unknown fields; actual embedded symbol geometry; library discovery and inheritance; symbol placement, movement, rotation, wiring, labels, text, junctions, no-connect markers and undo/redo; basic ERC; SVG/PDF/BOM exports; Windows installer and portable packaging.
+
+Symbols and footprints are bundled. 3D models are excluded. Legacy .sch editing, complete KiCad ERC, PCB editing, and automatic online updates are not yet available.
