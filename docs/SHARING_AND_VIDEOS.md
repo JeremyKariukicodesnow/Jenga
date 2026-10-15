@@ -10,7 +10,7 @@ Jenga source is public. Windows 0.8.0 binary distribution remains a **draft** pe
 
 This repository-hosted page checks public releases, selects the highest version including prereleases and redirects to its exact EXE. The page without `?start=1` shows the version and download choices first. It never offers drafts and never silently substitutes an older installer when the newest one is incomplete. Older release assets remain untouched. If the API is unavailable/rate-limited, it links to the release history. It is a browser download helper, not an in-app updater.
 
-**Older versions:** https://github.com/JeremyKariukicodesnow/Jenga/releases. Pick a release/tag and its installer; that version-specific asset stays attached to that release. No historical binary releases have been made public yet.
+**Older versions:** https://github.com/JeremyKariukicodesnow/Jenga/releases. Pick a release/tag and its installer; that version-specific asset stays attached to that release. Preserved 0.1.0–0.6.2 historical early-access installers, portable ZIPs and matching source are public. They are schematic-only releases; read each release before downgrading.
 
 The GitHub-native links below refer to **stable** releases only:
 
