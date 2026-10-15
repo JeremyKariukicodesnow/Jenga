@@ -6,27 +6,40 @@
   <meta name="description" content="Download the latest published Jenga Windows installer or choose an older release.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
   <title>Download Jenga</title>
+  <meta name="theme-color" content="#f7f5ed">
+  <link rel="icon" href="../assets/jenga.ico">
+  <meta property="og:title" content="Jenga — your next circuit starts here">
+  <meta property="og:image" content="https://jeremykariukicodesnow.github.io/Jenga/assets/jenga-hero.png">
   <link rel="stylesheet" href="style.css">
   <script type="module" src="page.mjs"></script>
+  <script type="module" src="motion.mjs"></script>
 </head>
 <body>
-  <header><a class="brand" href="https://github.com/JeremyKariukicodesnow/Jenga">JENGA</a><a href="https://github.com/JeremyKariukicodesnow/Jenga/releases">All releases</a></header>
+  <div class="blueprint" aria-hidden="true">
+    <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMin slice" focusable="false">
+      <g class="orbit" fill="none"><circle cx="1260" cy="210" r="118"/><circle cx="1260" cy="210" r="173"/><circle cx="1260" cy="210" r="230"/><path d="M1030 210h460M1260-20v460"/></g>
+      <g class="traces" fill="none"><path d="M-80 300H120L180 240H410L470 300H740L800 240H1480"/><path d="M-80 330H140L200 270H390L450 330H760L820 270H1480"/><path d="M-80 360H160L220 300H370L430 360H780L840 300H1480"/><path d="M-40 750H160L220 690H420L480 750H900L960 690H1500"/><path d="M-40 780H180L240 720H400L460 780H920L980 720H1500"/></g>
+      <g class="signals" fill="none"><path d="M-80 330H140L200 270H390L450 330H760L820 270H1480"/><path d="M-40 750H160L220 690H420L480 750H900L960 690H1500"/></g>
+      <g class="nodes"><circle cx="200" cy="270" r="4"/><circle cx="760" cy="330" r="4"/><circle cx="420" cy="690" r="4"/><circle cx="1260" cy="383" r="4"/></g>
+      <g class="cubes" fill="none"><path d="M1130 480l55-32 55 32v64l-55 32-55-32zm0 0l55 32 55-32m-55 32v64"/><path d="M80 130l35-20 35 20v40l-35 20-35-20zm0 0l35 20 35-20m-35 20v40"/></g>
+    </svg>
+  </div>
+  <header><a class="brand" href="../" aria-label="Jenga home"><img class="app-logo" src="../assets/jenga-logo.png" alt="" width="56" height="56"><img class="wordmark" src="../assets/jenga-wordmark.svg" alt="Jenga" width="142" height="34"></a><nav aria-label="Main navigation"><a href="https://github.com/JeremyKariukicodesnow/Jenga">Source</a><a href="https://github.com/JeremyKariukicodesnow/Jenga/releases">All releases <span aria-hidden="true">↗</span></a><button id="motion" class="motion" type="button" aria-pressed="false" hidden>Pause animation</button></nav></header>
   <main>
-    <p class="eyebrow">SCHEMATICS · PCB · 3D</p>
-    <h1>Your next circuit starts here.</h1>
+    <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> SCHEMATICS <span>·</span> PCB <span>·</span> 3D</p>
+    <h1>Your next circuit<br>starts <em>here.</em></h1>
     <p class="intro">An open-source electronics workspace for people and external AI assistants. The complete Windows package includes its libraries and native backend—no separate KiCad installation required.</p>
     <section class="download" aria-labelledby="download-heading">
       <p class="eyebrow" id="channel">LATEST PUBLISHED WINDOWS BUILD</p>
       <h2 id="download-heading">Checking availability…</h2>
       <p id="status" role="status" aria-live="polite">Finding the newest public release. Drafts are never offered.</p>
-      <div class="buttons"><a id="installer" class="button primary" aria-disabled="true">Download Windows installer (.exe)</a><a class="button secondary" href="https://github.com/JeremyKariukicodesnow/Jenga/releases">Older versions &amp; all releases</a></div>
+      <div class="buttons"><a id="installer" class="button primary" aria-disabled="true"><img src="../assets/jenga-logo.png" alt="" width="28" height="28"><span>Download for Windows <small>.exe · x64</small></span><span aria-hidden="true">↓</span></a><a class="button secondary" href="https://github.com/JeremyKariukicodesnow/Jenga/releases">Older versions &amp; all releases</a></div>
       <p id="details" class="details">Published early-access builds may be selected. Read the release status and verify checksums before use.</p>
       <div class="secondary-links"><a id="portable" hidden>Portable ZIP</a><a id="checksums" hidden>SHA-256 checksums</a><a id="notes" hidden>Release notes</a></div>
       <button id="copy" type="button">Copy shareable download link</button><span id="copy-status" role="status"></span>
       <noscript><p>JavaScript is needed to select the newest installer. You can always <a href="https://github.com/JeremyKariukicodesnow/Jenga/releases">choose a published release manually</a>.</p></noscript>
     </section>
-    <img class="hero" src="../assets/jenga-hero.png" alt="Conceptual illustration of a schematic flowing into a green printed circuit board" width="1672" height="941">
-    <p class="caption">Conceptual artwork, not an application screenshot or verified circuit.</p>
+    <figure class="artwork"><div class="artwork-bar"><span><i aria-hidden="true"></i> THE IDEA → THE BOARD</span><span>JENGA WORKSPACE</span></div><div class="hero-frame"><img class="hero" src="../assets/jenga-hero.png" alt="Conceptual illustration of a schematic flowing into a green printed circuit board" width="1672" height="941" decoding="async"></div><figcaption>Conceptual artwork, not an application screenshot or verified circuit.</figcaption></figure>
     <section class="notes"><div><h2>One link, current installer</h2><p>This page selects the highest published version, including early-access releases. It links directly to that release’s EXE. Older installers remain attached to their original releases.</p></div><div><h2>Useful, still evolving</h2><p>Jenga is early-access software. Keep backups and verify your designs. A successful export or attractive 3D model does not establish manufacturing readiness.</p></div></section>
     <nav class="footer-links" aria-label="Project resources"><a href="https://github.com/JeremyKariukicodesnow/Jenga#requirements">Requirements</a><a href="https://github.com/JeremyKariukicodesnow/Jenga/blob/main/docs/AI_ASSISTANTS.md">AI setup</a><a href="https://github.com/JeremyKariukicodesnow/Jenga/blob/main/THIRD_PARTY_NOTICES.md">Licenses &amp; credits</a><a href="https://github.com/JeremyKariukicodesnow/Jenga">Source on GitHub</a></nav>
   </main>

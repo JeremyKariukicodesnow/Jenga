@@ -1,4 +1,4 @@
-import {load, HISTORY} from './releases.mjs';
+import {load, HISTORY, version} from './releases.mjs';
 const get = id => document.getElementById(id);
 const share = 'https://jeremykariukicodesnow.github.io/Jenga/download/?start=1';
 get('copy').addEventListener('click', async () => {
@@ -14,6 +14,8 @@ try {
     get('status').textContent = 'The 0.8.0 Windows binaries remain in draft pending the redistribution review. Source code and release status are public.';
   } else {
     const {release} = model;
+    const selectedVersion = version(release.tag_name);
+    if (selectedVersion.numbers[0] === 0 && selectedVersion.numbers[1] < 7) get('details').textContent = 'Historical schematic-only release: PCB editing, the native PCB backend and 3D assemblies are not included. Read the release notes before downgrading.';
     get('download-heading').textContent = `Jenga ${release.tag_name}`;
     get('channel').textContent = release.prerelease || release.tag_name.includes('-') ? 'EARLY-ACCESS / PRERELEASE' : 'PUBLISHED RELEASE';
     get('notes').href = `${HISTORY}/tag/${encodeURIComponent(release.tag_name)}`;

@@ -80,3 +80,9 @@ test('download page leaves a manual route when GitHub fails', async () => {
   assert.equal(page.redirect, undefined);
   assert.match(page.elements.get('status').textContent, /Release lookup failed/);
 });
+
+test('historical schematic-only downloads disclose missing PCB and 3D features', async () => {
+  const page = await runPage([release('v0.6.2')]);
+  assert.match(page.elements.get('details').textContent, /schematic-only/);
+  assert.match(page.elements.get('details').textContent, /not included/);
+});
