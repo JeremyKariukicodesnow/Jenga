@@ -1,0 +1,7 @@
+//! Independent schematic model, KiCad I/O, rendering, and engineering checks.
+pub mod checks;
+pub mod document;
+pub mod export;
+pub mod font;
+pub mod scene;
+pub mod sexpr;
