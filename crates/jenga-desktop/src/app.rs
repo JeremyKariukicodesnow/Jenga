@@ -486,13 +486,13 @@ impl App {
     fn set_doc(&mut self, mut doc: Document) {
         self.pcb.active = false;
         self.workspace_ui.reset_scroll = true;
-        if let Some(path) = &doc.path {
-            if let Ok(project) = jenga_tools::project_workspace::discover(path) {
-                doc.page_context = project.page_context(path);
-                self.workspace_ui.root = project
-                    .project_file
-                    .or_else(|| project.pages.first().map(|p| p.file.clone()));
-            }
+        if let Some(path) = &doc.path
+            && let Ok(project) = jenga_tools::project_workspace::discover(path)
+        {
+            doc.page_context = project.page_context(path);
+            self.workspace_ui.root = project
+                .project_file
+                .or_else(|| project.pages.first().map(|p| p.file.clone()));
         }
         self.copy_all = false;
         self.copy_selection.clear();

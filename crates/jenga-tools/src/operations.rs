@@ -35,10 +35,16 @@ pub fn checkpoint() -> Result<()> {
 }
 pub fn progress(phase: &str, visited: usize) {
     CONTEXT.with(|c| {
-        if let Some((id, _)) = c.borrow().as_ref() {
-            if let Ok(p) = path(id) {
-                let _ = jenga_core::document::atomic_write(&p.with_extension("progress"), json!({"phase":phase,"visited_states":visited,"updated_ms":crate::journal::now()}).to_string().as_bytes(), false);
-            }
+        if let Some((id, _)) = c.borrow().as_ref()
+            && let Ok(p) = path(id)
+        {
+            let _ = jenga_core::document::atomic_write(
+                &p.with_extension("progress"),
+                json!({"phase":phase,"visited_states":visited,"updated_ms":crate::journal::now()})
+                    .to_string()
+                    .as_bytes(),
+                false,
+            );
         }
     });
 }
@@ -97,10 +103,10 @@ pub fn status(id: &str) -> Result<Value> {
                 "Worker exited. Outcome may be indeterminate; inspect saved revisions/history. This operation will not be replayed."
             );
         }
-        if let Ok(bytes) = std::fs::read(p.with_extension("progress")) {
-            if let Ok(progress) = serde_json::from_slice::<Value>(&bytes) {
-                v["progress"] = progress;
-            }
+        if let Ok(bytes) = std::fs::read(p.with_extension("progress"))
+            && let Ok(progress) = serde_json::from_slice::<Value>(&bytes)
+        {
+            v["progress"] = progress;
         }
         v["cancel_requested"] = json!(p.with_extension("cancel").exists());
     }

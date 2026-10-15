@@ -120,10 +120,10 @@ pub fn route_options(
             "label" | "global_label" | "hierarchical_label" | "text"
         ) {
             let (x, y, _) = jenga_core::document::position(n);
-            if !allowed((x, y)) {
-                if let Some(bounds) = scene.object_bounds(i) {
-                    obstacles.push(bounds);
-                }
+            if !allowed((x, y))
+                && let Some(bounds) = scene.object_bounds(i)
+            {
+                obstacles.push(bounds);
             }
         }
     }

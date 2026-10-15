@@ -9,7 +9,7 @@ Source publication and public binary distribution are separate decisions. Source
 - 3D tab/window/lighting, desktop-independent calculations, PNG and multi-view PDF exports.
 - CRCs and SHA-256 of the local release artifacts. See RELEASE_080_VALIDATION.md.
 
-These are local checks, not an independent audit or comprehensive clean-machine certification. Existing Clippy warnings are tracked by a visible advisory CI job rather than presented as passing strict lint compliance.
+These are local checks, not an independent audit or comprehensive clean-machine certification. Strict Clippy runs as a required-to-pass CI job alongside formatting and tests.
 
 ## Required before making Windows binaries public
 

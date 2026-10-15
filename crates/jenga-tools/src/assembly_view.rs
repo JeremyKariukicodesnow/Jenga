@@ -40,6 +40,8 @@ pub fn raster(mesh: &Mesh, w: u32, h: u32, yaw: f64, pitch: f64, zoom: f64) -> R
     raster_lit(mesh, w, h, yaw, pitch, zoom, 1.2, 0.7)
 }
 
+// Keep the rendering entry point explicit about camera and viewport parameters.
+#[allow(clippy::too_many_arguments)]
 pub fn raster_lit(
     mesh: &Mesh,
     w: u32,

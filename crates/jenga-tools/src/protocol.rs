@@ -606,7 +606,7 @@ pub fn mcp<R: BufRead, W: Write>(
         let p = request.get("params").cloned().unwrap_or(json!({}));
         let result = match method {
             "initialize" => Ok(
-                json!({"protocolVersion":match p["protocolVersion"].as_str(){Some(v @ ("2024-11-05"|"2025-03-26"|"2025-06-18"|"2025-11-25"))=>v,_=>"2025-11-25"},"capabilities":{"tools":{"listChanged":false}},"serverInfo":{"name":"jenga-tools","version":env!("CARGO_PKG_VERSION")},"instructions":"Jenga exposes deterministic engineering tools. Inspect first; use UUIDs and expected_revision; edits do not save automatically. actor:'ai:<client>' attributes changes. Call jenga_help for capabilities and examples. No model service is bundled."}),
+                json!({"protocolVersion":p["protocolVersion"].as_str().unwrap_or("2025-11-25"),"capabilities":{"tools":{"listChanged":false}},"serverInfo":{"name":"jenga-tools","version":env!("CARGO_PKG_VERSION")},"instructions":"Jenga exposes deterministic engineering tools. Inspect first; use UUIDs and expected_revision; edits do not save automatically. actor:'ai:<client>' attributes changes. Call jenga_help for capabilities and examples. No model service is bundled."}),
             ),
             "ping" => Ok(json!({})),
             "tools/list" => Ok(json!({"tools":tools()})),

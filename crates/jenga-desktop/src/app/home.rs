@@ -118,7 +118,7 @@ impl App {
                             self.project_previews
                                 .insert(path.clone(), (modified, Scene::from_document(&doc)));
                         }
-                        if path.extension().is_some_and(|e|e=="kicad_pcb")&&self.project_previews.get(path).is_none_or(|(time,_)|*time!=modified){if let Ok(b)=jenga_core::pcb::Board::open(path){self.project_previews.insert(path.clone(),(modified,b.scene(None,false)));}}
+                        if path.extension().is_some_and(|e|e=="kicad_pcb")&&self.project_previews.get(path).is_none_or(|(time,_)|*time!=modified)&& let Ok(b)=jenga_core::pcb::Board::open(path){self.project_previews.insert(path.clone(),(modified,b.scene(None,false)));}
                         let (rect, response) =
                             ui.allocate_exact_size(Vec2::new(width, 270.), egui::Sense::click());
                         response.context_menu(|ui| {

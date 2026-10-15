@@ -30,9 +30,8 @@ jobs:
       - name: Release executable
         run: cargo build --release --locked
   lint:
-    name: Clippy advisory — existing lint debt
+    name: Rust Clippy
     runs-on: windows-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:

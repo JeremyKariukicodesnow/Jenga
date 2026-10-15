@@ -185,17 +185,15 @@ fn main() -> anyhow::Result<()> {
                     .as_str()
                     .and_then(|s| s.strip_prefix("jenga_"))
                     .map(str::to_owned)
+                    && (jenga_tools::operations::mutation(&method)
+                        || matches!(method.as_str(), "pcb_verify" | "pcb_3d" | "preview_edit"))
                 {
-                    if jenga_tools::operations::mutation(&method)
-                        || matches!(method.as_str(), "pcb_verify" | "pcb_3d" | "preview_edit")
-                    {
-                        if v["params"]["arguments"].is_null() {
-                            v["params"]["arguments"] = json!({});
-                        }
-                        if let Some(args) = v["params"]["arguments"].as_object_mut() {
-                            args.entry("operation_id")
-                                .or_insert_with(|| json!(uuid::Uuid::new_v4().to_string()));
-                        }
+                    if v["params"]["arguments"].is_null() {
+                        v["params"]["arguments"] = json!({});
+                    }
+                    if let Some(args) = v["params"]["arguments"].as_object_mut() {
+                        args.entry("operation_id")
+                            .or_insert_with(|| json!(uuid::Uuid::new_v4().to_string()));
                     }
                 }
                 if v["method"] == "initialize" {

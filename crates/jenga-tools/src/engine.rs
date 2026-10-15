@@ -121,13 +121,13 @@ pub fn edit(doc: &mut Document, libs: &mut Libraries, request: &Value) -> Result
             failures.push(json!({"kind":"connection_intent","findings":verification["findings"]}));
         }
     }
-    if request.get("allow_named_net_merges") != Some(&Value::Bool(true)) {
-        if let Err(e) = crate::net_guard::named_merges(doc, &candidate) {
-            if request["dry_run"] != true {
-                return Err(e);
-            }
-            failures.push(json!({"kind":"unintended_short","error":e.to_string()}));
+    if request.get("allow_named_net_merges") != Some(&Value::Bool(true))
+        && let Err(e) = crate::net_guard::named_merges(doc, &candidate)
+    {
+        if request["dry_run"] != true {
+            return Err(e);
         }
+        failures.push(json!({"kind":"unintended_short","error":e.to_string()}));
     }
     if request["dry_run"] == true {
         failures.extend(crate::net_guard::unintended_merges(
@@ -771,20 +771,20 @@ impl Engine {
             );
         }
         let mut result = self.request_inner(method, p);
-        if result.is_ok() && matches!(method, "rename" | "save_project_as") {
-            if let (Some(old_board), Some(new_doc)) =
+        if result.is_ok()
+            && matches!(method, "rename" | "save_project_as")
+            && let (Some(old_board), Some(new_doc)) =
                 (old_board, self.doc.as_ref().and_then(|d| d.path.as_ref()))
-            {
-                let folder = new_doc.parent().unwrap();
-                let paired = folder.join(format!(
-                    "{}.kicad_pcb",
-                    new_doc.file_stem().unwrap_or_default().to_string_lossy()
-                ));
-                let same = folder.join(old_board.file_name().unwrap());
-                let path = if paired.is_file() { paired } else { same };
-                if path.is_file() {
-                    self.board = Some(jenga_core::pcb::Board::open(&path)?);
-                }
+        {
+            let folder = new_doc.parent().unwrap();
+            let paired = folder.join(format!(
+                "{}.kicad_pcb",
+                new_doc.file_stem().unwrap_or_default().to_string_lossy()
+            ));
+            let same = folder.join(old_board.file_name().unwrap());
+            let path = if paired.is_file() { paired } else { same };
+            if path.is_file() {
+                self.board = Some(jenga_core::pcb::Board::open(&path)?);
             }
         }
         if result.is_ok()
@@ -800,14 +800,11 @@ impl Engine {
                     | "rename"
                     | "save_project_as"
             )
+            && let Some(doc) = self.doc.as_mut()
+            && let Some(path) = &doc.path
+            && let Ok(project) = crate::project_workspace::discover(path)
         {
-            if let Some(doc) = self.doc.as_mut() {
-                if let Some(path) = &doc.path {
-                    if let Ok(project) = crate::project_workspace::discover(path) {
-                        doc.page_context = project.page_context(path);
-                    }
-                }
-            }
+            doc.page_context = project.page_context(path);
         }
         if result.is_ok()
             && matches!(

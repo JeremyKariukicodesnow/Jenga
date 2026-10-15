@@ -145,7 +145,7 @@ pub fn verify(doc: &Document, p: &Value) -> Result<Value> {
         .children("wire")
         .filter_map(|n| {
             let pts = points(n, "pts");
-            (pts.len() == 2).then(|| (n, pts))
+            (pts.len() == 2).then_some((n, pts))
         })
         .collect();
     let anchors = crate::net_guard::avoid_points(doc);

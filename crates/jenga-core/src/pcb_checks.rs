@@ -248,13 +248,11 @@ pub fn copper(board: &Board) -> Vec<Copper> {
                 pcb::point(n, "at"),
                 n.child("size").map(|n| n.number(1) / 2.).unwrap_or(0.3),
             )),
-            "zone" => {
-                if n.child("keepout").is_none() {
-                    for poly in n.children("filled_polygon") {
-                        let p = pcb::pts(poly);
-                        if p.len() >= 3 {
-                            push(Geometry::Polygon(p));
-                        }
+            "zone" if n.child("keepout").is_none() => {
+                for poly in n.children("filled_polygon") {
+                    let p = pcb::pts(poly);
+                    if p.len() >= 3 {
+                        push(Geometry::Polygon(p));
                     }
                 }
             }

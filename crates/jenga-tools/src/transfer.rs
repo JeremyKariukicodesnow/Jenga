@@ -74,16 +74,15 @@ fn local_asset(value: &str, original: &Path, stage: &Path) -> Result<Option<Stri
         Ok(Some(p.to_string_lossy().replace('\\', "/")))
     }
 }
-fn model_assets(n: &mut Node, original: &Path, stage: &Path, prefix: &str) -> Result<()> {
-    if n.name() == "model" {
-        if let Some(path) = local_asset(n.value(1), original, stage)? {
-            let path = path;
-            n.items_mut()[1] = Node::string(path);
-        }
+fn model_assets(n: &mut Node, original: &Path, stage: &Path) -> Result<()> {
+    if n.name() == "model"
+        && let Some(path) = local_asset(n.value(1), original, stage)?
+    {
+        n.items_mut()[1] = Node::string(path);
     }
     if let Node::List(items) = n {
         for child in items {
-            model_assets(child, original, stage, prefix)?;
+            model_assets(child, original, stage)?;
         }
     }
     Ok(())
@@ -235,10 +234,10 @@ pub fn request(e: &mut Engine, method: &str, p: &Value) -> Result<Value> {
             && file.starts_with(stage.path().join(".jenga/boards"))
         {
             let mut value: Value = serde_json::from_slice(&fs::read(&file)?)?;
-            if let Some(link) = value["schematic"].as_str().map(PathBuf::from) {
-                if let Ok(rel) = link.strip_prefix(&source) {
-                    value["schematic"] = json!(dest.join(rel));
-                }
+            if let Some(link) = value["schematic"].as_str().map(PathBuf::from)
+                && let Ok(rel) = link.strip_prefix(&source)
+            {
+                value["schematic"] = json!(dest.join(rel));
             }
             atomic_write(&file, &serde_json::to_vec_pretty(&value)?, false)?;
         }
@@ -324,7 +323,7 @@ fn import_document(e: &mut Engine, p: &Value) -> Result<Value> {
         "Hierarchical schematics must be imported as a complete project so child links remain intact"
     );
     let prefix = format!("${{KIPRJMOD}}/imports/{name}");
-    model_assets(&mut root, original, stage.path(), &prefix)?;
+    model_assets(&mut root, original, stage.path())?;
     remap(&mut root, "${KIPRJMOD}", &prefix);
     let mut tables = vec![];
     for table in ["sym-lib-table", "fp-lib-table"] {
@@ -347,10 +346,10 @@ fn import_document(e: &mut Engine, p: &Value) -> Result<Value> {
             )
         };
         for lib in src.items_mut().iter_mut().filter(|n| n.name() == "lib") {
-            if let Some(uri) = lib.child("uri").map(|n| n.value(1).to_owned()) {
-                if let Some(path) = local_asset(&uri, original, stage.path())? {
-                    lib.set_child(Node::list("uri", vec![Node::string(path)]));
-                }
+            if let Some(uri) = lib.child("uri").map(|n| n.value(1).to_owned())
+                && let Some(path) = local_asset(&uri, original, stage.path())?
+            {
+                lib.set_child(Node::list("uri", vec![Node::string(path)]));
             }
             let old = lib
                 .child("name")
@@ -376,7 +375,7 @@ fn import_document(e: &mut Engine, p: &Value) -> Result<Value> {
             Some("kicad_mod" | "kicad_sym")
         ) {
             let mut n = parse(&fs::read_to_string(&file)?)?;
-            model_assets(&mut n, original, stage.path(), &prefix)?;
+            model_assets(&mut n, original, stage.path())?;
             remap(&mut n, "${KIPRJMOD}", &prefix);
             atomic_write(&file, n.document_text().as_bytes(), false)?;
         }

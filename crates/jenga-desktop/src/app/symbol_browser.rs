@@ -105,20 +105,20 @@ impl App {
                     title_job.wrap.overflow_character = Some('…');
                     let title = painter.layout_job(title_job);
                     painter.galley(rect.min + Vec2::new(9., 8.), title, Color32::from_gray(22));
-                    if ui.is_rect_visible(rect) {
-                        if let Ok(def) = Libraries::symbol_from_file(path, name) {
-                            let scene = Scene::symbol_preview_unit(&def, 1);
-                            let area = egui::Rect::from_min_size(
-                                rect.min + Vec2::new(9., 42.),
-                                Vec2::new(width - 18., 104.),
-                            );
-                            let mut view = View {
-                                show_grid: false,
-                                ..Default::default()
-                            };
-                            view.fit(&scene, area);
-                            canvas::paint(&ui.painter_at(area), &view, area, &scene, None, false);
-                        }
+                    if ui.is_rect_visible(rect)
+                        && let Ok(def) = Libraries::symbol_from_file(path, name)
+                    {
+                        let scene = Scene::symbol_preview_unit(&def, 1);
+                        let area = egui::Rect::from_min_size(
+                            rect.min + Vec2::new(9., 42.),
+                            Vec2::new(width - 18., 104.),
+                        );
+                        let mut view = View {
+                            show_grid: false,
+                            ..Default::default()
+                        };
+                        view.fit(&scene, area);
+                        canvas::paint(&ui.painter_at(area), &view, area, &scene, None, false);
                     }
                     let area = egui::Rect::from_min_size(
                         rect.min + Vec2::new(8., 158.),
@@ -199,8 +199,23 @@ impl App {
     }
     fn open_library_symbol(&mut self, path: &Path, name: &str, personal: bool) {
         let custom = self.custom_sources().iter().any(|(_, p)| p == path);
-        if custom && !personal {
-            if let Some(folder) = path.parent().and_then(|p| p.parent()) {
+        if custom
+            && !personal
+            && let Some(folder) = path.parent().and_then(|p| p.parent())
+            && self
+                .doc
+                .as_ref()
+                .and_then(|d| d.path.as_ref())
+                .and_then(|p| p.parent())
+                != Some(folder)
+            && let Ok(files) = std::fs::read_dir(folder)
+        {
+            if let Some(file) = files
+                .flatten()
+                .map(|f| f.path())
+                .find(|p| p.extension().is_some_and(|e| e == "kicad_sch"))
+            {
+                self.open_path(&file);
                 if self
                     .doc
                     .as_ref()
@@ -208,30 +223,12 @@ impl App {
                     .and_then(|p| p.parent())
                     != Some(folder)
                 {
-                    if let Ok(files) = std::fs::read_dir(folder) {
-                        if let Some(file) = files
-                            .flatten()
-                            .map(|f| f.path())
-                            .find(|p| p.extension().is_some_and(|e| e == "kicad_sch"))
-                        {
-                            self.open_path(&file);
-                            if self
-                                .doc
-                                .as_ref()
-                                .and_then(|d| d.path.as_ref())
-                                .and_then(|p| p.parent())
-                                != Some(folder)
-                            {
-                                return;
-                            }
-                        } else {
-                            self.status =
-                                "Open or save this symbol's project before editing its library"
-                                    .into();
-                            return;
-                        }
-                    }
+                    return;
                 }
+            } else {
+                self.status =
+                    "Open or save this symbol's project before editing its library".into();
+                return;
             }
         }
         match Libraries::symbol_from_file(path, name) {
@@ -317,11 +314,10 @@ impl App {
             for (_, file) in self.custom_sources() {
                 if let Ok(text) = std::fs::read_to_string(&file)
                     && let Ok(root) = jenga_core::sexpr::parse(&text)
+                    && let Some(n) = root.children("symbol").next()
                 {
-                    if let Some(n) = root.children("symbol").next() {
-                        self.symbol_browser.selected = Some((n.value(1).into(), file));
-                        break;
-                    }
+                    self.symbol_browser.selected = Some((n.value(1).into(), file));
+                    break;
                 }
             }
         }

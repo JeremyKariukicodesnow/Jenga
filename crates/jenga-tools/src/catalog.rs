@@ -53,25 +53,27 @@ pub fn events() -> Vec<Event> {
 pub fn apply(paths: &mut Vec<PathBuf>, events: &[Event]) {
     for e in events {
         if let Some(old) = &e.old {
-            if e.kind == "forget" && old.with_extension("kicad_pro").is_file() {
-                if let Some(folder) = old.parent() {
-                    paths.retain(|p| p.parent() != Some(folder));
-                }
+            if e.kind == "forget"
+                && old.with_extension("kicad_pro").is_file()
+                && let Some(folder) = old.parent()
+            {
+                paths.retain(|p| p.parent() != Some(folder));
             }
             if let Some(folder) = old.parent() {
                 if e.kind == "delete_project" {
                     paths.retain(|p| !p.starts_with(folder) || p.is_file());
                 }
-                if e.kind == "rename" {
-                    if let Some(new_folder) = e.path.as_ref().and_then(|p| p.parent()) {
-                        for path in paths.iter_mut() {
-                            if !path.is_file() && path.starts_with(folder) {
-                                if let Ok(relative) = path.strip_prefix(folder) {
-                                    let candidate = new_folder.join(relative);
-                                    if candidate.is_file() {
-                                        *path = candidate;
-                                    }
-                                }
+                if e.kind == "rename"
+                    && let Some(new_folder) = e.path.as_ref().and_then(|p| p.parent())
+                {
+                    for path in paths.iter_mut() {
+                        if !path.is_file()
+                            && path.starts_with(folder)
+                            && let Ok(relative) = path.strip_prefix(folder)
+                        {
+                            let candidate = new_folder.join(relative);
+                            if candidate.is_file() {
+                                *path = candidate;
                             }
                         }
                     }

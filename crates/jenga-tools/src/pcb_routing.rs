@@ -197,8 +197,8 @@ pub fn route_points(
     let mut dist: HashMap<State, f64> = HashMap::new();
     let mut prev: HashMap<State, State> = HashMap::new();
     let mut queue = BinaryHeap::new();
-    for l in 0..layers.len() {
-        if allowed(from_layers, &layers[l]) && safe(from, point(a.0, a.1), l, width / 2.) {
+    for (l, layer) in layers.iter().enumerate() {
+        if allowed(from_layers, layer) && safe(from, point(a.0, a.1), l, width / 2.) {
             let start = (a.0, a.1, l, 8);
             dist.insert(start, 0.);
             queue.push((std::cmp::Reverse(0_i64), start));

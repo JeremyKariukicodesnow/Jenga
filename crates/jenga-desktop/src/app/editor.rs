@@ -79,7 +79,7 @@ impl App {
                 if ui.button("Arrange unwired selected symbols").clicked(){
                     if let Some(doc)=&self.doc{
                         let ids:Vec<_>=doc.root.items().iter().enumerate().filter(|(i,n)|n.name()=="symbol"&&(self.copy_all||self.selected==Some(*i)||n.child("uuid").is_some_and(|id|self.copy_selection.iter().any(|s|s==id.value(1))))).filter_map(|(_,n)|n.child("uuid").map(|id|id.value(1).to_owned())).collect();
-                        if !ids.is_empty(){if let Err(e)=self.control_request("edit",&serde_json::json!({"actions":[{"op":"arrange_symbols","uuids":ids,"at":[20.32,25.4]}],"actor":"user"})){self.fail(e);}}
+                        if !ids.is_empty()&& let Err(e)=self.control_request("edit",&serde_json::json!({"actions":[{"op":"arrange_symbols","uuids":ids,"at":[20.32,25.4]}],"actor":"user"})){self.fail(e);}
                     }
                     ui.close();
                 }

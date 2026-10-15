@@ -427,10 +427,9 @@ pub fn endpoints() -> Vec<Endpoint> {
         for entry in entries.flatten() {
             if let Ok(bytes) = fs::read(entry.path())
                 && let Ok(e) = serde_json::from_slice::<Endpoint>(&bytes)
+                && process_alive(e.pid) != Some(false)
             {
-                if process_alive(e.pid) != Some(false) {
-                    out.push(e);
-                }
+                out.push(e);
             }
         }
     }

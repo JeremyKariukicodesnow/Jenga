@@ -54,18 +54,17 @@ impl App {
                 ui.label(project.folder.display().to_string());ui.add_space(10.);
                 ui.horizontal_wrapped(|ui|{
                     if crate::design::button(ui,"Folder","folder",false).on_hover_text("Open project location").clicked(){let _=std::process::Command::new("explorer.exe").arg(&project.folder).spawn();}
-                    if crate::design::button(ui,"New PCB","symbol",false).clicked(){let mut name="Board".to_owned();let mut count=1;while project.folder.join(format!("{name}.kicad_pcb")).exists(){count+=1;name=format!("Board{count}");}self.pcb_job("pcb_new",json!({"path":project.folder.join(format!("{name}.kicad_pcb"))}),ui.ctx());}
-                    if self.doc.is_some() && crate::design::button(ui,"Build PCB","wire",false).on_hover_text("Audit component footprints, then preview placement and routing").clicked(){self.pcb_job("pcb_preflight",json!({}),ui.ctx());}
-                    if crate::design::button(ui,"Footprints","symbol",false).clicked(){self.footprints.open=true;}
-
-                    if crate::design::button(ui,"New schematic","symbol",false).on_hover_text("Add a separate schematic, starting with one page").clicked(){self.workspace_ui.page_dialog=true;self.workspace_ui.hierarchical=false;self.workspace_ui.page_name="NewSchematic".into();}
-                    if crate::design::button(ui,"Add page","symbol",false).on_hover_text("Add a child page to the currently open schematic").clicked(){self.workspace_ui.page_dialog=true;self.workspace_ui.hierarchical=false;self.workspace_ui.page_name="NewPage".into();}
-                    if crate::design::button(ui,"Page name","rename",false).on_hover_text("Edit the current schematic title and worksheet; root filenames remain paired with the KiCad project").clicked(){self.page_dialog=true;}
-                    if crate::design::button(ui,"Export","export",false).clicked(){self.workspace_ui.export_dialog=true;self.workspace_ui.selected_pages=project.pages.iter().map(|p|p.file.clone()).collect();}
-                    if crate::design::button(ui,"Symbol editor","symbol",false).clicked(){let mut e=symbols::SymbolEditor::default();e.set_personal(false);self.symbol_editor=Some(e);}
-                    if crate::design::button(ui,"Rename","rename",false).clicked(){self.start_project_rename();}
-                    if crate::design::button(ui,"Save as","save_as",false).clicked(){self.copy_project_to();}
-                    if crate::design::button(ui,"Delete","delete",false).clicked(){self.delete_current_project();self.workspace_ui.show=self.doc.is_some();}
+if crate::design::button(ui,"New PCB","symbol",false).clicked(){let mut name="Board".to_owned();let mut count=1;while project.folder.join(format!("{name}.kicad_pcb")).exists(){count+=1;name=format!("Board{count}");}self.pcb_job("pcb_new",json!({"path":project.folder.join(format!("{name}.kicad_pcb"))}),ui.ctx());}
+if self.doc.is_some() && crate::design::button(ui,"Build PCB","wire",false).on_hover_text("Audit component footprints, then preview placement and routing").clicked(){self.pcb_job("pcb_preflight",json!({}),ui.ctx());}
+if crate::design::button(ui,"Footprints","symbol",false).clicked(){self.footprints.open=true;}
+if crate::design::button(ui,"New schematic","symbol",false).on_hover_text("Add a separate schematic, starting with one page").clicked(){self.workspace_ui.page_dialog=true;self.workspace_ui.hierarchical=false;self.workspace_ui.page_name="NewSchematic".into();}
+if crate::design::button(ui,"Add page","symbol",false).on_hover_text("Add a child page to the currently open schematic").clicked(){self.workspace_ui.page_dialog=true;self.workspace_ui.hierarchical=false;self.workspace_ui.page_name="NewPage".into();}
+if crate::design::button(ui,"Page name","rename",false).on_hover_text("Edit the current schematic title and worksheet; root filenames remain paired with the KiCad project").clicked(){self.page_dialog=true;}
+if crate::design::button(ui,"Export","export",false).clicked(){self.workspace_ui.export_dialog=true;self.workspace_ui.selected_pages=project.pages.iter().map(|p|p.file.clone()).collect();}
+if crate::design::button(ui,"Symbol editor","symbol",false).clicked(){let mut e=symbols::SymbolEditor::default();e.set_personal(false);self.symbol_editor=Some(e);}
+if crate::design::button(ui,"Rename","rename",false).clicked(){self.start_project_rename();}
+if crate::design::button(ui,"Save as","save_as",false).clicked(){self.copy_project_to();}
+if crate::design::button(ui,"Delete","delete",false).clicked(){self.delete_current_project();self.workspace_ui.show=self.doc.is_some();}
                 });
                 ui.add_space(16.);ui.label(format!("{} schematics • {} pages • native KiCad project",project.pages.iter().filter(|p|p.parent.is_none()).count(),project.pages.len()));
                 let columns=if ui.available_width()<600. {1}else{2};
@@ -87,17 +86,17 @@ impl App {
                         let area=egui::Rect::from_min_size(card.left_bottom()+Vec2::new(10.,-59.),Vec2::new(width-20.,49.));
                         let mut buttons=ui.new_child(egui::UiBuilder::new().max_rect(area).layout(egui::Layout::left_to_right(egui::Align::Min)));buttons.set_clip_rect(area);
                         for(label,icon)in[("Open","select"),("Rename","rename"),("Export","export"),("Delete","delete")]{if crate::design::button(&mut buttons,label,icon,false).clicked(){action=Some(label);}}
-                        if let Some(action)=action{self.open_path(&page.file);match action{
+if let Some(action)=action{self.open_path(&page.file);match action{
                             "Open"=>self.workspace_ui.show=false,
                             "Rename"=>self.page_dialog=true,
                             "Export"=>{self.workspace_ui.export_dialog=true;self.workspace_ui.selected_pages=std::iter::once(page.file.clone()).collect();},
                             "Delete"=>{if project.project_file.as_ref().is_some_and(|p|p.with_extension("kicad_sch")==page.file){self.delete_current_project();}else if rfd::MessageDialog::new().set_title("Delete page?").set_description("Move this page to recovery storage and remove its parent sheet link?").set_buttons(rfd::MessageButtons::OkCancel).show()==rfd::MessageDialogResult::Ok&&self.save(false){match jenga_tools::project_workspace::delete_page(self.doc.as_ref().unwrap(),&json!({"path":page.file})){Ok(_)=>{let root=project.project_file.as_ref().map(|p|p.with_extension("kicad_sch"));self.doc=None;if let Some(root)=root{self.open_path(&root);}self.status="Page deleted · recoverable".into();},Err(e)=>self.fail(e)}}},_=>{}}
                         }
-                        if response.on_hover_text(page.file.display().to_string()).clicked(){self.open_path(&page.file);self.workspace_ui.show=false;}
+if response.on_hover_text(page.file.display().to_string()).clicked(){self.open_path(&page.file);self.workspace_ui.show=false;}
                     }});ui.add_space(12.);
                 }
                 ui.separator();ui.heading("Printed circuit boards");
-                ui.horizontal_wrapped(|ui|{for file in &project.boards{egui::Frame::group(ui.style()).show(ui,|ui|{ui.set_width(360.);ui.strong(file.file_stem().unwrap_or_default().to_string_lossy());if let Ok(board)=jenga_core::pcb::Board::open(file){let scene=board.scene(None,false);let(rect,r)=ui.allocate_exact_size(Vec2::new(340.,170.),egui::Sense::click());let mut view=View{show_grid:false,..Default::default()};view.fit(&scene,rect);canvas::paint(&ui.painter_at(rect),&view,rect,&scene,None,false);ui.label(format!("{} footprints · {}",board.root.children("footprint").count(),if board.schematic.is_some(){"Linked schematic"}else{"Independent PCB"}));if r.clicked()||ui.button("Open PCB").clicked(){if self.may_replace(){self.open_path(file);self.workspace_ui.show=false;}}}});}});
+                ui.horizontal_wrapped(|ui|{for file in &project.boards{egui::Frame::group(ui.style()).show(ui,|ui|{ui.set_width(360.);ui.strong(file.file_stem().unwrap_or_default().to_string_lossy());if let Ok(board)=jenga_core::pcb::Board::open(file){let scene=board.scene(None,false);let(rect,r)=ui.allocate_exact_size(Vec2::new(340.,170.),egui::Sense::click());let mut view=View{show_grid:false,..Default::default()};view.fit(&scene,rect);canvas::paint(&ui.painter_at(rect),&view,rect,&scene,None,false);ui.label(format!("{} footprints · {}",board.root.children("footprint").count(),if board.schematic.is_some(){"Linked schematic"}else{"Independent PCB"}));if (r.clicked()||ui.button("Open PCB").clicked())&& self.may_replace(){self.open_path(file);self.workspace_ui.show=false;}}});}});
                 ui.separator();ui.heading("Project footprints");self.project_footprint_cards(ui,&project.folder);
                 ui.separator();ui.label("Project symbols");
                 if ui.button("Browse / edit project symbols…").clicked(){self.symbol_browser.open=true;self.symbol_browser.project_only=true;self.symbol_browser.open_epoch+=1;}
@@ -148,24 +147,24 @@ impl App {
     }
     pub(super) fn copy_project_to(&mut self) {
         if self.pcb.active {
-            if self.save_pcb() {
-                if let Some(folder) = rfd::FileDialog::new().pick_folder() {
-                    let name = format!(
-                        "{}Copy",
-                        self.pcb
-                            .board
-                            .as_ref()
-                            .and_then(|b| b.path.as_ref())
-                            .and_then(|p| p.file_stem())
-                            .unwrap_or_default()
-                            .to_string_lossy()
-                    );
-                    if let Err(e) = self.control_request(
-                        "pcb_copy_project",
-                        &json!({"folder":folder,"name":name,"actor":"user"}),
-                    ) {
-                        self.fail(e);
-                    }
+            if self.save_pcb()
+                && let Some(folder) = rfd::FileDialog::new().pick_folder()
+            {
+                let name = format!(
+                    "{}Copy",
+                    self.pcb
+                        .board
+                        .as_ref()
+                        .and_then(|b| b.path.as_ref())
+                        .and_then(|p| p.file_stem())
+                        .unwrap_or_default()
+                        .to_string_lossy()
+                );
+                if let Err(e) = self.control_request(
+                    "pcb_copy_project",
+                    &json!({"folder":folder,"name":name,"actor":"user"}),
+                ) {
+                    self.fail(e);
                 }
             }
             return;
@@ -197,7 +196,8 @@ impl App {
             egui::Window::new("Export selected project pages").open(&mut open).show(ctx,|ui|{
                 let project=self.workspace_ui.root.as_ref().or_else(||self.doc.as_ref().and_then(|d|d.path.as_ref())).and_then(|p|jenga_tools::project_workspace::discover(p).ok());
                 if let Some(project)=project{
-                    ui.horizontal(|ui|{if ui.button("All pages").clicked(){self.workspace_ui.selected_pages=project.pages.iter().map(|p|p.file.clone()).collect();}if ui.button("Current page only").clicked(){self.workspace_ui.selected_pages=self.doc.as_ref().and_then(|d|d.path.clone()).into_iter().collect();}});
+                    ui.horizontal(|ui|{if ui.button("All pages").clicked(){self.workspace_ui.selected_pages=project.pages.iter().map(|p|p.file.clone()).collect();}
+if ui.button("Current page only").clicked(){self.workspace_ui.selected_pages=self.doc.as_ref().and_then(|d|d.path.clone()).into_iter().collect();}});
                     for page in &project.pages{let mut selected=self.workspace_ui.selected_pages.contains(&page.file);if ui.checkbox(&mut selected,&page.name).changed(){if selected{self.workspace_ui.selected_pages.insert(page.file.clone());}else{self.workspace_ui.selected_pages.remove(&page.file);}}}
                     ui.checkbox(&mut self.workspace_ui.export_individual,"Export a separate file for each page (including PDF)");ui.label("With separate files off, PDF combines selected pages. SVG/PNG/native always export individual files.");
                     ui.horizontal(|ui|{for format in ["pdf","png","svg","kicad_sch"]{if ui.button(format.to_uppercase()).clicked()&&self.save(false){let path=if format=="pdf"&&!self.workspace_ui.export_individual{rfd::FileDialog::new().set_file_name(format!("{}.pdf",project.name)).save_file()}else{rfd::FileDialog::new().pick_folder()};if let Some(path)=path{let p=json!({"path":path,"format":format,"separate":self.workspace_ui.export_individual,"pages":self.workspace_ui.selected_pages,"actor":"user"});match jenga_tools::project_workspace::export_pages(&project,&p){Ok(_)=>{self.status="Exported selected project pages".into();self.workspace_ui.export_dialog=false;},Err(e)=>self.fail(e)}}}}});
@@ -221,20 +221,22 @@ impl App {
         let mut open = true;
         egui::Window::new("Pages · switch and organise").open(&mut open).default_width(760.).vscroll(true).show(ctx,|ui|{
    ui.label("Switch pages, edit their worksheet/title, rename or reorder sibling pages. Root schematics remain first.");
-   ui.horizontal(|ui|{if ui.button("Add page").clicked(){self.workspace_ui.page_dialog=true;self.workspace_ui.hierarchical=false;self.workspace_ui.page_name="NewPage".into();}if ui.button("Export pages…").clicked(){self.workspace_ui.export_dialog=true;}});
+   ui.horizontal(|ui|{if ui.button("Add page").clicked(){self.workspace_ui.page_dialog=true;self.workspace_ui.hierarchical=false;self.workspace_ui.page_name="NewPage".into();}
+if ui.button("Export pages…").clicked(){self.workspace_ui.export_dialog=true;}});
    if let Some(path)=self.doc.as_ref().and_then(|d|d.path.as_ref())&&let Ok(project)=jenga_tools::project_workspace::discover(path){
     for(i,page)in project.pages.iter().enumerate(){ui.horizontal_wrapped(|ui|{
      let active=self.doc.as_ref().and_then(|d|d.path.as_ref())==Some(&page.file);
      if ui.selectable_label(active,format!("{}  {}",i+1,page.name)).on_hover_text(page.file.display().to_string()).clicked(){self.open_path(&page.file);}
-     if ui.small_button("Title / edit").clicked(){self.open_path(&page.file);self.page_dialog=true;}
-     if ui.small_button("Rename").clicked(){self.workspace_ui.rename_path=Some(page.file.clone());self.workspace_ui.rename_text=page.name.clone();}
+if ui.small_button("Title / edit").clicked(){self.open_path(&page.file);self.page_dialog=true;}
+if ui.small_button("Rename").clicked(){self.workspace_ui.rename_path=Some(page.file.clone());self.workspace_ui.rename_text=page.name.clone();}
      for(label,up)in[("↑",true),("↓",false)]{let other=if up{(0..i).rev().find(|&j|project.pages[j].parent==page.parent)}else{(i+1..project.pages.len()).find(|&j|project.pages[j].parent==page.parent)};
       if ui.add_enabled(page.parent.is_some()&&other.is_some(),egui::Button::new(label)).clicked()&&self.save(false){let order=match jenga_tools::project_workspace::move_sibling(&project,&page.file,up){Ok(v)=>v,Err(e)=>{self.fail(e);return;}};if let Err(e)=self.control_request("reorder_pages",&json!({"pages":order,"actor":"user"})){self.fail(e);}}
      }
-     if ui.small_button("Delete").clicked(){if project.project_file.as_ref().is_some_and(|p|p.with_extension("kicad_sch")==page.file){self.open_path(&page.file);self.delete_current_project();}else if rfd::MessageDialog::new().set_title("Delete page?").set_description("Archive this page and remove its parent sheet link? It remains recoverable.").set_buttons(rfd::MessageButtons::OkCancel).show()==rfd::MessageDialogResult::Ok&&self.save(false){if let Err(e)=self.control_request("delete_page",&json!({"path":page.file,"actor":"user"})){self.fail(e);}}}
+if ui.small_button("Delete").clicked(){if project.project_file.as_ref().is_some_and(|p|p.with_extension("kicad_sch")==page.file){self.open_path(&page.file);self.delete_current_project();}else if rfd::MessageDialog::new().set_title("Delete page?").set_description("Archive this page and remove its parent sheet link? It remains recoverable.").set_buttons(rfd::MessageButtons::OkCancel).show()==rfd::MessageDialogResult::Ok&&self.save(false)&& let Err(e)=self.control_request("delete_page",&json!({"path":page.file,"actor":"user"})){self.fail(e);}}
     });}
    }
-   if let Some(path)=self.workspace_ui.rename_path.clone(){ui.separator();ui.text_edit_singleline(&mut self.workspace_ui.rename_text);ui.horizontal(|ui|{if ui.button("Save page name").clicked()&&self.save(false){let name=self.workspace_ui.rename_text.clone();match self.control_request("rename_page",&json!({"path":path,"name":name,"actor":"user"})){Ok(_)=>self.workspace_ui.rename_path=None,Err(e)=>self.fail(e)}}if ui.button("Cancel rename").clicked(){self.workspace_ui.rename_path=None;}});}
+if let Some(path)=self.workspace_ui.rename_path.clone(){ui.separator();ui.text_edit_singleline(&mut self.workspace_ui.rename_text);ui.horizontal(|ui|{if ui.button("Save page name").clicked()&&self.save(false){let name=self.workspace_ui.rename_text.clone();match self.control_request("rename_page",&json!({"path":path,"name":name,"actor":"user"})){Ok(_)=>self.workspace_ui.rename_path=None,Err(e)=>self.fail(e)}}
+if ui.button("Cancel rename").clicked(){self.workspace_ui.rename_path=None;}});}
   });
         self.workspace_ui.manager = open;
     }

@@ -64,12 +64,12 @@ pub fn unintended_merges(
     for pair in pairs {
         let from = key(before, &pair["from"]);
         let to = key(before, &pair["to"]);
-        if let (Ok(a), Ok(b)) = (from, to) {
-            if let (Some(a), Some(b)) = (old.get(&a), old.get(&b)) {
-                let a = root(&parents, *a);
-                let b = root(&parents, *b);
-                parents[b] = a;
-            }
+        if let (Ok(a), Ok(b)) = (from, to)
+            && let (Some(a), Some(b)) = (old.get(&a), old.get(&b))
+        {
+            let a = root(&parents, *a);
+            let b = root(&parents, *b);
+            parents[b] = a;
         }
     }
     let mut incoming: HashMap<usize, HashSet<usize>> = HashMap::new();
