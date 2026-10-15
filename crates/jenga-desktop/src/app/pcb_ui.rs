@@ -498,7 +498,7 @@ impl App {
     }
     pub(super) fn pcb_panels(&mut self, ui: &mut egui::Ui) {
         let ctx = ui.ctx().clone();
-        egui::Panel::top("pcb_tools").show_inside(ui, |ui| {
+        egui::Panel::top("pcb_tools").show(ui, |ui| {
             ui.horizontal_wrapped(|ui| {
                 if ui.button("⌂ Project").clicked() {
                     if self
@@ -691,12 +691,12 @@ impl App {
         });
         egui::Panel::right("pcb_inspector")
             .default_size(270.)
-            .show_inside(ui, |ui| {
+            .show(ui, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| self.pcb_properties(ui));
             });
         egui::CentralPanel::default()
             .frame(egui::Frame::NONE)
-            .show_inside(ui, |ui| self.pcb_canvas(ui));
+            .show(ui, |ui| self.pcb_canvas(ui));
     }
     fn pcb_properties(&mut self, ui: &mut egui::Ui) {
         let Some(b) = self.pcb.board.as_ref().map(Board::snapshot) else {
@@ -1230,7 +1230,9 @@ impl App {
                         open = false;
                     }
                     #[allow(deprecated)]
-                    egui::CentralPanel::default().show(ctx, |ui| self.assembly_content(ui, ctx));
+                    let assembly_ctx = ctx.clone();
+                    egui::CentralPanel::default()
+                        .show(ctx, |ui| self.assembly_content(ui, &assembly_ctx));
                 }
             },
         );
