@@ -229,26 +229,23 @@ impl App {
             if job.result.is_ok() {
                 let actor = job.params["actor"].as_str().unwrap_or("external");
                 let changed = job.engine.board.as_ref().map(Board::revision) != job.base_board;
-                if changed {
-                    if let Some(b) = &job.engine.board {
-                        if let Err(e) = jenga_tools::pcb_tools::record(
-                            self.pcb.board.as_ref(),
-                            b,
-                            actor,
-                            &job.method,
-                        ) {
-                            job.result = Err(e);
-                        }
-                    }
+                if changed
+                    && let Some(b) = &job.engine.board
+                    && let Err(e) = jenga_tools::pcb_tools::record(
+                        self.pcb.board.as_ref(),
+                        b,
+                        actor,
+                        &job.method,
+                    )
+                {
+                    job.result = Err(e);
                 }
                 if job.result.is_ok()
                     && job.engine.doc.as_ref().map(jenga_tools::journal::revision) != job.base_doc
+                    && let (Some(a), Some(b)) = (&self.doc, &job.engine.doc)
+                    && let Err(e) = jenga_tools::journal::record(a, b, actor, &job.method)
                 {
-                    if let (Some(a), Some(b)) = (&self.doc, &job.engine.doc) {
-                        if let Err(e) = jenga_tools::journal::record(a, b, actor, &job.method) {
-                            job.result = Err(e);
-                        }
-                    }
+                    job.result = Err(e);
                 }
                 if job.result.is_ok() {
                     let selected_uuid = self
@@ -317,19 +314,19 @@ impl App {
                     }
                     if v["preview_id"].is_string() {
                         self.pcb.preview_dialog = true;
-                        if let Some(path) = v["preview_image_path"].as_str() {
-                            if let Ok(im) = image::open(path) {
-                                let im = im.into_rgba8();
-                                let color = egui::ColorImage::from_rgba_unmultiplied(
-                                    [im.width() as usize, im.height() as usize],
-                                    im.as_raw(),
-                                );
-                                self.pcb.preview_texture = Some(ctx.load_texture(
-                                    "pcb_batch_preview",
-                                    color,
-                                    egui::TextureOptions::LINEAR,
-                                ));
-                            }
+                        if let Some(path) = v["preview_image_path"].as_str()
+                            && let Ok(im) = image::open(path)
+                        {
+                            let im = im.into_rgba8();
+                            let color = egui::ColorImage::from_rgba_unmultiplied(
+                                [im.width() as usize, im.height() as usize],
+                                im.as_raw(),
+                            );
+                            self.pcb.preview_texture = Some(ctx.load_texture(
+                                "pcb_batch_preview",
+                                color,
+                                egui::TextureOptions::LINEAR,
+                            ));
                         }
                     } else {
                         self.pcb.preview_dialog = false;
@@ -501,7 +498,7 @@ impl App {
     }
     pub(super) fn pcb_panels(&mut self, ui: &mut egui::Ui) {
         let ctx = ui.ctx().clone();
-        egui::Panel::top("pcb_tools").show_inside(ui, |ui| {
+        egui::Panel::top("pcb_tools").show(ui, |ui| {
             ui.horizontal_wrapped(|ui| {
                 if ui.button("⌂ Project").clicked() {
                     if self
@@ -561,17 +558,17 @@ impl App {
                             }
                         }
                     }
-                    if ui.button("Export all PCB pages to PDF...").clicked() && self.save_pcb() {
-                        if let Some(path) = rfd::FileDialog::new()
+                    if ui.button("Export all PCB pages to PDF...").clicked()
+                        && self.save_pcb()
+                        && let Some(path) = rfd::FileDialog::new()
                             .set_file_name("PCB-pages.pdf")
                             .save_file()
-                        {
-                            self.pcb_job(
-                                "pcb_export_pages",
-                                json!({"path":path,"format":"pdf"}),
-                                &ctx,
-                            );
-                        }
+                    {
+                        self.pcb_job(
+                            "pcb_export_pages",
+                            json!({"path":path,"format":"pdf"}),
+                            &ctx,
+                        );
                     }
                 });
                 if self.doc.is_some() && ui.button("Schematic").clicked() {
@@ -631,10 +628,10 @@ impl App {
                 });
                 if let Some(id) = self.pcb.pending_id.clone() {
                     ui.label("Background job running");
-                    if ui.button("Cancel job").clicked() {
-                        if let Err(e) = jenga_tools::operations::cancel(&id) {
-                            self.fail(e);
-                        }
+                    if ui.button("Cancel job").clicked()
+                        && let Err(e) = jenga_tools::operations::cancel(&id)
+                    {
+                        self.fail(e);
                     }
                     if let Ok(status) = jenga_tools::operations::status(&id) {
                         ui.label(
@@ -694,12 +691,12 @@ impl App {
         });
         egui::Panel::right("pcb_inspector")
             .default_size(270.)
-            .show_inside(ui, |ui| {
+            .show(ui, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| self.pcb_properties(ui));
             });
         egui::CentralPanel::default()
             .frame(egui::Frame::NONE)
-            .show_inside(ui, |ui| self.pcb_canvas(ui));
+            .show(ui, |ui| self.pcb_canvas(ui));
     }
     fn pcb_properties(&mut self, ui: &mut egui::Ui) {
         let Some(b) = self.pcb.board.as_ref().map(Board::snapshot) else {
@@ -871,10 +868,10 @@ impl App {
                 {
                     self.pcb_job("pcb_commit", json!({"preview_id":id}), &ctx);
                 }
-                if ui.button("Open preview image").clicked() {
-                    if let Some(path) = v["preview_image_path"].as_str() {
-                        let _ = std::process::Command::new("explorer.exe").arg(path).spawn();
-                    }
+                if ui.button("Open preview image").clicked()
+                    && let Some(path) = v["preview_image_path"].as_str()
+                {
+                    let _ = std::process::Command::new("explorer.exe").arg(path).spawn();
                 }
             }
             egui::CollapsingHeader::new("Findings and exact results")
@@ -1030,24 +1027,24 @@ impl App {
                     self.pcb.tool = tool.into();
                 }
             }
-            if let Some(i) = self.pcb.selected {
-                if let Some(n) = b.root.items().get(i) {
-                    let op = if ui.input(|i| i.key_pressed(Key::Delete)) {
-                        Some("delete")
-                    } else if n.name() == "footprint" && ui.input(|i| i.key_pressed(Key::R)) {
-                        Some("rotate")
-                    } else if n.name() == "footprint" && ui.input(|i| i.key_pressed(Key::F)) {
-                        Some("flip")
-                    } else {
-                        None
-                    };
-                    if let Some(op) = op {
-                        self.pcb_job(
-                            "pcb_edit",
-                            json!({"actions":[{"op":op,"uuid":pcb::id(n)}]}),
-                            &ctx,
-                        );
-                    }
+            if let Some(i) = self.pcb.selected
+                && let Some(n) = b.root.items().get(i)
+            {
+                let op = if ui.input(|i| i.key_pressed(Key::Delete)) {
+                    Some("delete")
+                } else if n.name() == "footprint" && ui.input(|i| i.key_pressed(Key::R)) {
+                    Some("rotate")
+                } else if n.name() == "footprint" && ui.input(|i| i.key_pressed(Key::F)) {
+                    Some("flip")
+                } else {
+                    None
+                };
+                if let Some(op) = op {
+                    self.pcb_job(
+                        "pcb_edit",
+                        json!({"actions":[{"op":op,"uuid":pcb::id(n)}]}),
+                        &ctx,
+                    );
                 }
             }
         }
@@ -1170,15 +1167,36 @@ impl App {
                                             op["operation_id"].as_str().unwrap_or_default().into(),
                                         );
                                     }
-                                    if op["status"]=="completed"&&ui.button("View result").clicked(){if let Some(id)=op["operation_id"].as_str(){if let Ok(receipt)=jenga_tools::operations::status(id){let v=receipt["result"].clone();self.pcb.preview_dialog=v["preview_id"].is_string();self.pcb.preview_texture=None;if let Some(path)=v["preview_image_path"].as_str(){if let Ok(image)=image::open(path){let image=image.into_rgba8();let pixels=egui::ColorImage::from_rgba_unmultiplied([image.width() as usize,image.height() as usize],image.as_raw());self.pcb.preview_texture=Some(ctx.load_texture("background-result",pixels,egui::TextureOptions::LINEAR));}}self.pcb.result=Some(v);}}}
+                                    if op["status"] == "completed"
+                                        && ui.button("View result").clicked()
+                                        && let Some(id) = op["operation_id"].as_str()
+                                        && let Ok(receipt) = jenga_tools::operations::status(id)
+                                    {
+                                        let v = receipt["result"].clone();
+                                        self.pcb.preview_dialog = v["preview_id"].is_string();
+                                        self.pcb.preview_texture = None;
+                                        if let Some(path) = v["preview_image_path"].as_str()
+                                            && let Ok(image) = image::open(path)
+                                        {
+                                            let image = image.into_rgba8();
+                                            let pixels = egui::ColorImage::from_rgba_unmultiplied(
+                                                [image.width() as usize, image.height() as usize],
+                                                image.as_raw(),
+                                            );
+                                            self.pcb.preview_texture = Some(ctx.load_texture(
+                                                "background-result",
+                                                pixels,
+                                                egui::TextureOptions::LINEAR,
+                                            ));
+                                        }
+                                        self.pcb.result = Some(v);
+                                    }
                                     if op["status"] == "pending"
                                         && ui.button("Request cancellation").clicked()
+                                        && let Some(id) = op["operation_id"].as_str()
+                                        && let Err(e) = jenga_tools::operations::cancel(id)
                                     {
-                                        if let Some(id) = op["operation_id"].as_str() {
-                                            if let Err(e) = jenga_tools::operations::cancel(id) {
-                                                self.fail(e);
-                                            }
-                                        }
+                                        self.fail(e);
                                     }
                                 });
                             });
@@ -1211,8 +1229,9 @@ impl App {
                     if ctx.input(|i| i.viewport().close_requested()) {
                         open = false;
                     }
-                    #[allow(deprecated)]
-                    egui::CentralPanel::default().show(ctx, |ui| self.assembly_content(ui, ctx));
+                    let assembly_ctx = ctx.clone();
+                    egui::CentralPanel::default()
+                        .show(ctx, |ui| self.assembly_content(ui, &assembly_ctx));
                 }
             },
         );
@@ -1245,13 +1264,12 @@ impl App {
                             .selectable_value(&mut self.pcb.view_name, view.into(), view)
                             .changed()
                             && view != "current"
+                            && let Ok((yaw, pitch)) = jenga_tools::assembly_view::camera(view)
                         {
-                            if let Ok((yaw, pitch)) = jenga_tools::assembly_view::camera(view) {
-                                self.pcb.yaw = yaw;
-                                self.pcb.pitch = pitch;
-                                self.pcb.zoom = 1.;
-                                self.pcb.pan = Vec2::ZERO;
-                            }
+                            self.pcb.yaw = yaw;
+                            self.pcb.pitch = pitch;
+                            self.pcb.zoom = 1.;
+                            self.pcb.pan = Vec2::ZERO;
                         }
                     }
                 });
@@ -1397,6 +1415,8 @@ impl App {
         }
     }
 }
+// Keep the rendering entry point explicit about camera and viewport parameters.
+#[allow(clippy::too_many_arguments)]
 pub(super) fn paint_mesh(
     ui: &egui::Ui,
     rect: egui::Rect,
@@ -1487,8 +1507,7 @@ fn paint_mesh_lit(
         } else {
             let factor = (1200. / rect.width())
                 .min(900. / rect.height())
-                .min(1.)
-                .max(0.01);
+                .clamp(0.01, 1.);
             let width = (rect.width() * factor).round().max(1.) as usize;
             let height = (rect.height() * factor).round().max(1.) as usize;
             let mut pixels = vec![Color32::from_rgb(29, 34, 41); width * height];

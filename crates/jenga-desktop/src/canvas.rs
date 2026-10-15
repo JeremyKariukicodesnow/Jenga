@@ -165,10 +165,10 @@ pub fn paint_shapes(painter: &egui::Painter, view: &View, rect: Rect, scene: &Sc
                 let points: Vec<_> = points.iter().map(|p| view.screen(*p, rect)).collect();
                 let stroke = Stroke::new((*width as f32 * view.scale).max(0.8), color(*c));
                 if *closed {
-                    if let Some(c) = fill {
-                        if let Some(mesh) = polygon_mesh(&points, color(*c)) {
-                            painter.add(EShape::mesh(mesh));
-                        }
+                    if let Some(c) = fill
+                        && let Some(mesh) = polygon_mesh(&points, color(*c))
+                    {
+                        painter.add(EShape::mesh(mesh));
                     }
                     painter.add(EShape::closed_line(points, stroke));
                 } else {
@@ -267,10 +267,10 @@ pub fn paint_pcb(
             _ => *c,
         };
         match &mut d.shape {
-            Shape::Circle { fill, .. } | Shape::Path { fill, .. } => {
-                if fill.is_some_and(|c| c[0] > 240 && c[1] > 240) {
-                    *fill = Some([22, 26, 32]);
-                }
+            Shape::Circle { fill, .. } | Shape::Path { fill, .. }
+                if fill.is_some_and(|c| c[0] > 240 && c[1] > 240) =>
+            {
+                *fill = Some([22, 26, 32]);
             }
             _ => {}
         }
@@ -333,10 +333,9 @@ fn polygon_mesh(points: &[Pos2], color: Color32) -> Option<egui::Mesh> {
             ear = Some(i);
             break;
         }
-        if let Some(i) = ear {
+        {
+            let i = ear?;
             remaining.remove(i);
-        } else {
-            return None;
         }
     }
     mesh.add_triangle(

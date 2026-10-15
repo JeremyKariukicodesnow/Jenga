@@ -4,7 +4,7 @@
 
 Anyone can fork, propose changes or report bugs. Proposals do not grant authority to merge, tag releases, change licensing or represent the project. Trusted maintainers may be added explicitly after sustained reviewed contributions; access should use the minimum required role and be reviewed periodically.
 
-Main requires pull requests, a code-owner review, resolved conversations and passing formatting/test checks. Force pushes and branch deletion are disabled. Tag rules restrict release-tag changes to the maintainer/admin role. Repository admins retain exceptional recovery powers; use bypass only for documented emergencies or initial setup and record why.
+Main requires pull requests, a code-owner review, resolved conversations and passing Windows formatting/test/build checks and strict Clippy. Force pushes and branch deletion are disabled. Tag rules restrict release-tag changes to the maintainer/admin role. Repository admins retain exceptional recovery powers; use bypass only for documented emergencies or initial setup and record why.
 
 Only maintainers publish releases after the release checklist. No auto-merge or release credentials run on untrusted PRs. Contributors work through forks. GitHub account two-factor authentication and recovery-code management are the owner's responsibility and cannot be enforced by repository files alone.
 

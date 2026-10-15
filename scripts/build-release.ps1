@@ -138,6 +138,5 @@ directory = "vendor"
 }
 & tar -a -c -f $sourceZip -C $sourceDir .
 if ($LASTEXITCODE -ne 0) {throw 'Source archive failed'}
-$releaseFiles = Get-ChildItem -LiteralPath $releaseDir -File | Where-Object Extension -In '.exe','.zip'
-$releaseFiles | ForEach-Object {"$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())  $($_.Name)"} | Set-Content -LiteralPath (Join-Path $releaseDir 'SHA256SUMS')
+& (Join-Path $PSScriptRoot 'prepare-download-aliases.ps1') -ReleaseDirectory $releaseDir -Version $version
 Write-Output "Release saved in $releaseDir"

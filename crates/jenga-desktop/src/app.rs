@@ -486,13 +486,13 @@ impl App {
     fn set_doc(&mut self, mut doc: Document) {
         self.pcb.active = false;
         self.workspace_ui.reset_scroll = true;
-        if let Some(path) = &doc.path {
-            if let Ok(project) = jenga_tools::project_workspace::discover(path) {
-                doc.page_context = project.page_context(path);
-                self.workspace_ui.root = project
-                    .project_file
-                    .or_else(|| project.pages.first().map(|p| p.file.clone()));
-            }
+        if let Some(path) = &doc.path
+            && let Ok(project) = jenga_tools::project_workspace::discover(path)
+        {
+            doc.page_context = project.page_context(path);
+            self.workspace_ui.root = project
+                .project_file
+                .or_else(|| project.pages.first().map(|p| p.file.clone()));
         }
         self.copy_all = false;
         self.copy_selection.clear();
@@ -828,8 +828,8 @@ impl eframe::App for App {
             title
         };
         ctx.send_viewport_cmd(egui::ViewportCommand::Title(title));
-        egui::Panel::top("menu").show_inside(ui, |ui| self.menu(ui));
-        egui::Panel::bottom("status").show_inside(ui, |ui| {
+        egui::Panel::top("menu").show(ui, |ui| self.menu(ui));
+        egui::Panel::bottom("status").show(ui, |ui| {
             ui.horizontal(|ui| {
                 ui.label(RichText::new(&self.status).small());
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -847,31 +847,31 @@ impl eframe::App for App {
             self.workspace_ui.was_shown = false;
         }
         if self.pcb.show_3d && self.pcb.viewer_mode == "tab" {
-            egui::CentralPanel::default().show_inside(ui, |ui| self.assembly_content(ui, &ctx));
+            egui::CentralPanel::default().show(ui, |ui| self.assembly_content(ui, &ctx));
         } else if (self.doc.is_some() || self.pcb.board.is_some()) && self.workspace_ui.show {
-            egui::CentralPanel::default().show_inside(ui, |ui| self.project_overview(ui));
+            egui::CentralPanel::default().show(ui, |ui| self.project_overview(ui));
         } else if self.pcb.active && self.pcb.board.is_some() {
             self.pcb_panels(ui);
         } else if self.doc.is_some() {
-            egui::Panel::top("toolbar").show_inside(ui, |ui| self.toolbar(ui));
+            egui::Panel::top("toolbar").show(ui, |ui| self.toolbar(ui));
             if self.doc.is_some() {
                 egui::Panel::right("properties_compact_v3")
                     .default_size(218.)
                     .min_size(180.)
-                    .show_inside(ui, |ui| {
+                    .show(ui, |ui| {
                         egui::ScrollArea::vertical().show(ui, |ui| self.properties(ui));
                     });
                 egui::Panel::left("components_compact_v3")
                     .default_size(205.)
                     .min_size(175.)
-                    .show_inside(ui, |ui| {
+                    .show(ui, |ui| {
                         egui::Panel::bottom("fixed_placement_tools")
-                            .show_inside(ui, |ui| self.palette_footer(ui));
+                            .show(ui, |ui| self.palette_footer(ui));
                         self.palette(ui);
                     });
                 egui::CentralPanel::default()
                     .frame(egui::Frame::NONE)
-                    .show_inside(ui, |ui| {
+                    .show(ui, |ui| {
                         if self.doc.is_some() {
                             self.canvas(ui);
                         }
@@ -881,7 +881,7 @@ impl eframe::App for App {
             egui::Panel::left("home_navigation")
                 .default_size(175.)
                 .resizable(false)
-                .show_inside(ui, |ui| {
+                .show(ui, |ui| {
                     ui.add_space(18.);
                     crate::design::brand(ui, "JENGA", 1.1);
                     ui.add_space(40.);
@@ -940,7 +940,7 @@ the next thing.",
                             .weak(),
                     );
                 });
-            egui::CentralPanel::default().show_inside(ui, |ui| self.home(ui));
+            egui::CentralPanel::default().show(ui, |ui| self.home(ui));
         }
         self.dialogs(&ctx);
         self.observe_history();

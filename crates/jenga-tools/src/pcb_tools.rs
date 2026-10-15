@@ -478,19 +478,17 @@ pub fn request(e: &mut Engine, method: &str, p: &Value) -> Result<Value> {
                 .as_ref()
                 .and_then(|p| p.parent())
                 .map(Path::to_owned)
+                && Some(old.as_path()) != path.parent()
             {
-                if Some(old.as_path()) != path.parent() {
-                    for fp in candidate
-                        .root
-                        .items_mut()
-                        .iter_mut()
-                        .filter(|n| n.name() == "footprint")
-                    {
-                        for model in fp.items_mut().iter_mut().filter(|n| n.name() == "model") {
-                            if let Some(resolved) = pcb_backend::resolve_model(model.value(1), &old)
-                            {
-                                model.items_mut()[1] = Node::string(resolved.to_string_lossy());
-                            }
+                for fp in candidate
+                    .root
+                    .items_mut()
+                    .iter_mut()
+                    .filter(|n| n.name() == "footprint")
+                {
+                    for model in fp.items_mut().iter_mut().filter(|n| n.name() == "model") {
+                        if let Some(resolved) = pcb_backend::resolve_model(model.value(1), &old) {
+                            model.items_mut()[1] = Node::string(resolved.to_string_lossy());
                         }
                     }
                 }
@@ -712,27 +710,27 @@ pub fn verify(b: &Board, p: &Value) -> Result<Value> {
 }
 fn verify_with_source(b: &Board, doc: Option<&Document>, p: &Value) -> Result<Value> {
     let mut v = verify(b, p)?;
-    if p["include_schematic"] != false {
-        if let Some(link) = &b.schematic {
-            let disk = if !doc.is_some_and(|d| d.path.as_ref() == Some(link)) {
-                Document::open(link).ok()
-            } else {
-                None
-            };
-            if let Some(doc) = doc
-                .filter(|d| d.path.as_ref() == Some(link))
-                .or(disk.as_ref())
-            {
-                let report = crate::workflows::verify(doc, &json!({}))?;
-                if report["passed"] == false {
-                    v["passed"] = json!(false);
-                }
-                v["schematic_verification"] = report;
-            } else {
-                v["schematic_verification"] =
-                    json!({"passed":false,"error":"Linked schematic is unavailable","file":link});
+    if p["include_schematic"] != false
+        && let Some(link) = &b.schematic
+    {
+        let disk = if !doc.is_some_and(|d| d.path.as_ref() == Some(link)) {
+            Document::open(link).ok()
+        } else {
+            None
+        };
+        if let Some(doc) = doc
+            .filter(|d| d.path.as_ref() == Some(link))
+            .or(disk.as_ref())
+        {
+            let report = crate::workflows::verify(doc, &json!({}))?;
+            if report["passed"] == false {
                 v["passed"] = json!(false);
             }
+            v["schematic_verification"] = report;
+        } else {
+            v["schematic_verification"] =
+                json!({"passed":false,"error":"Linked schematic is unavailable","file":link});
+            v["passed"] = json!(false);
         }
     }
     Ok(v)
@@ -1165,7 +1163,7 @@ fn action(b: &mut Board, libs: &jenga_libraries::Libraries, a: &Value) -> Result
         "stackup" => {
             let count = a["copper_layers"].as_u64().unwrap_or(2);
             ensure!(
-                (2..=32).contains(&count) && count % 2 == 0,
+                (2..=32).contains(&count) && count.is_multiple_of(2),
                 "Copper layer count must be even, 2–32"
             );
             ensure!(
@@ -1541,15 +1539,15 @@ fn action(b: &mut Board, libs: &jenga_libraries::Libraries, a: &Value) -> Result
                 .enumerate()
                 .filter(|(_, p)| p.net > 0 && p.kind != "np_thru_hole")
             {
-                if let Some(previous) = groups.insert(before[i], after[i]) {
-                    if previous != after[i] {
-                        *b = old;
-                        anyhow::bail!(
-                            "Cleanup would disconnect {}.{}; no cleanup applied",
-                            p.reference,
-                            p.number
-                        );
-                    }
+                if let Some(previous) = groups.insert(before[i], after[i])
+                    && previous != after[i]
+                {
+                    *b = old;
+                    anyhow::bail!(
+                        "Cleanup would disconnect {}.{}; no cleanup applied",
+                        p.reference,
+                        p.number
+                    );
                 }
             }
             b.dirty = true;
@@ -1611,7 +1609,8 @@ struct Part {
     uuid: String,
     pins: Vec<String>,
 }
-fn design(doc: &Document) -> Result<(Vec<Part>, Vec<(String, Vec<(String, String)>)>)> {
+type DesignNets = Vec<(String, Vec<(String, String)>)>;
+fn design(doc: &Document) -> Result<(Vec<Part>, DesignNets)> {
     if doc.root.children("sheet").next().is_some() {
         ensure!(
             !doc.dirty,
@@ -1834,11 +1833,8 @@ fn sync(
     }
     ensure!(
         missing.is_empty(),
-        "PCB synchronization preflight failed: {}",
-        format!(
-            "\n{}\nAssign an existing or custom footprint to each listed symbol, then preview again. No PCB edits applied.",
-            missing.join("\n")
-        )
+        "PCB synchronization preflight failed:\n{}\nAssign an existing or custom footprint to each listed symbol, then preview again. No PCB edits applied.",
+        missing.join("\n")
     );
     let mut added = vec![];
     let mut updated = vec![];
@@ -1971,10 +1967,10 @@ fn autoplace(b: &mut Board, p: &Value) -> Result<Value> {
         .enumerate()
         .filter(|(_, n)| n.name() == "footprint")
     {
-        if !selected.contains(&i) {
-            if let Some(bounds) = scene.object_bounds(i) {
-                occupied.push(bounds);
-            }
+        if !selected.contains(&i)
+            && let Some(bounds) = scene.object_bounds(i)
+        {
+            occupied.push(bounds);
         }
     }
     let mut ordered = indices.clone();
@@ -2410,22 +2406,22 @@ fn project_operation(e: &mut Engine, method: &str, p: &Value) -> Result<Value> {
         let new_pro = new.with_extension("kicad_pro");
         ensure!(!new_pro.exists(), "Project rename destination exists");
         std::fs::rename(&path, &new)?;
-        if old_pro.exists() {
-            if let Err(err) = std::fs::rename(&old_pro, &new_pro) {
-                let _ = std::fs::rename(&new, &path);
-                return Err(err.into());
-            }
+        if old_pro.exists()
+            && let Err(err) = std::fs::rename(&old_pro, &new_pro)
+        {
+            let _ = std::fs::rename(&new, &path);
+            return Err(err.into());
         }
         let oldmeta = Board::metadata_path(&path);
         let newmeta = Board::metadata_path(&new);
-        if oldmeta.exists() {
-            if let Err(err) = std::fs::rename(&oldmeta, &newmeta) {
-                let _ = std::fs::rename(&new, &path);
-                if new_pro.exists() {
-                    let _ = std::fs::rename(&new_pro, &old_pro);
-                }
-                return Err(err.into());
+        if oldmeta.exists()
+            && let Err(err) = std::fs::rename(&oldmeta, &newmeta)
+        {
+            let _ = std::fs::rename(&new, &path);
+            if new_pro.exists() {
+                let _ = std::fs::rename(&new_pro, &old_pro);
             }
+            return Err(err.into());
         }
         let mut renamed = Board::open(&new)?;
         renamed.dirty = true;
@@ -2474,10 +2470,10 @@ fn project_operation(e: &mut Engine, method: &str, p: &Value) -> Result<Value> {
         std::fs::rename(&oldmeta, &newmeta)?;
     }
     let mut b = Board::open(&new)?;
-    if let Some(schematic) = &b.schematic {
-        if let Ok(relative) = schematic.strip_prefix(folder) {
-            b.schematic = Some(dest.join(relative));
-        }
+    if let Some(schematic) = &b.schematic
+        && let Ok(relative) = schematic.strip_prefix(folder)
+    {
+        b.schematic = Some(dest.join(relative));
     }
     b.dirty = true;
     b.save(&new)?;

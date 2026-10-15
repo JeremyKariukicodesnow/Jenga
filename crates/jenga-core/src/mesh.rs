@@ -130,10 +130,10 @@ impl Mesh {
             for i in 0..count {
                 let start = 84 + i * 50 + 12;
                 let mut v = [[0.; 3]; 3];
-                for j in 0..3 {
-                    for k in 0..3 {
+                for (j, vertex) in v.iter_mut().enumerate() {
+                    for (k, coordinate) in vertex.iter_mut().enumerate() {
                         let off = start + (j * 3 + k) * 4;
-                        v[j][k] =
+                        *coordinate =
                             f32::from_le_bytes(bytes[off..off + 4].try_into().unwrap()) as f64;
                     }
                 }

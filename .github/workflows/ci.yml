@@ -14,23 +14,26 @@ jobs:
     name: Windows format and tests
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Install stable Rust
         run: rustup update stable
       - name: Formatting
         run: cargo fmt --all --check
+      - name: Published release download selection
+        run: node --test scripts/test-release-links.mjs
+      - name: Download alias integrity
+        run: ./scripts/test-download-aliases.ps1
       - name: Tests
         run: cargo test --workspace --locked
       - name: Release executable
         run: cargo build --release --locked
   lint:
-    name: Clippy advisory — existing lint debt
+    name: Rust Clippy
     runs-on: windows-latest
-    continue-on-error: true
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - run: rustup update stable

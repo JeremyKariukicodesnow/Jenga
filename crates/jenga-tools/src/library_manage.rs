@@ -65,10 +65,10 @@ pub fn manage(doc: Option<&Document>, p: &Value) -> Result<Value> {
             child.items_mut()[1] = Node::string(format!("{new}_{suffix}"));
         }
         for n in root.items_mut().iter_mut().filter(|n| n.name() == "symbol") {
-            if let Some(e) = n.child_mut("extends") {
-                if e.value(1) == name {
-                    e.items_mut()[1] = Node::string(new);
-                }
+            if let Some(e) = n.child_mut("extends")
+                && e.value(1) == name
+            {
+                e.items_mut()[1] = Node::string(new);
             }
         }
     } else if action == "delete" {

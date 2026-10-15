@@ -41,14 +41,13 @@ pub fn symbol(p: &Value) -> Result<Node> {
             ("Reference", "prefix"),
             ("Value", "value"),
         ] {
-            if let Some(value) = p.get(param).and_then(Value::as_str) {
-                if let Some(field) = symbol
+            if let Some(value) = p.get(param).and_then(Value::as_str)
+                && let Some(field) = symbol
                     .items_mut()
                     .iter_mut()
                     .find(|n| n.name() == "property" && n.value(1) == key)
-                {
-                    field.items_mut()[2] = Node::string(value);
-                }
+            {
+                field.items_mut()[2] = Node::string(value);
             }
         }
         if p.get("replace_pins") == Some(&Value::Bool(true)) {

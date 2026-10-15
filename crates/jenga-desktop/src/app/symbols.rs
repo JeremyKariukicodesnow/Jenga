@@ -107,14 +107,16 @@ impl SymbolEditor {
         self.personal = personal;
     }
     pub(super) fn from_definition(mut def: Node, id: &str, personal: bool) -> Self {
-        let mut e = Self::default();
-        e.load_id = id.into();
-        e.name = def
-            .value(1)
-            .rsplit(':')
-            .next()
-            .unwrap_or(def.value(1))
-            .into();
+        let mut e = Self {
+            load_id: id.into(),
+            name: def
+                .value(1)
+                .rsplit(':')
+                .next()
+                .unwrap_or(def.value(1))
+                .into(),
+            ..Self::default()
+        };
         def.items_mut()[1] = Node::string(&e.name);
         e.value = property(&def, "Value").into();
         e.description = property(&def, "Description").into();
@@ -147,18 +149,6 @@ impl SymbolEditor {
             }
         }
         e
-    }
-}
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn embedded_qualified_symbol_name_is_valid_for_source_preview() {
-        let mut def=jenga_tools::symbol_editor::symbol(&json!({"name":"Old","prefix":"U","pins":[{"number":"1","name":"Signal","at":[-12.7,0]}]})).unwrap();
-        def.items_mut()[1] = Node::string("Test:Old");
-        let editor = SymbolEditor::from_definition(def, "Test:Old", false);
-        assert_eq!(editor.name, "Old");
-        assert!(jenga_tools::symbol_editor::symbol(&editor.params()).is_ok());
     }
 }
 impl SymbolEditor {
@@ -488,17 +478,17 @@ impl SymbolEditor {
 fn graphic_bounds(s: &serde_json::Value) -> (Point, Point) {
     let mut pts = vec![];
     for key in ["start", "end", "mid", "at", "center"] {
-        if let Some(p) = s[key].as_array() {
-            if p.len() == 2 {
-                pts.push((p[0].as_f64().unwrap_or(0.), p[1].as_f64().unwrap_or(0.)));
-            }
+        if let Some(p) = s[key].as_array()
+            && p.len() == 2
+        {
+            pts.push((p[0].as_f64().unwrap_or(0.), p[1].as_f64().unwrap_or(0.)));
         }
     }
     for p in s["points"].as_array().into_iter().flatten() {
-        if let Some(p) = p.as_array() {
-            if p.len() == 2 {
-                pts.push((p[0].as_f64().unwrap_or(0.), p[1].as_f64().unwrap_or(0.)));
-            }
+        if let Some(p) = p.as_array()
+            && p.len() == 2
+        {
+            pts.push((p[0].as_f64().unwrap_or(0.), p[1].as_f64().unwrap_or(0.)));
         }
     }
     if s["kind"] == "circle"
@@ -517,21 +507,33 @@ fn graphic_bounds(s: &serde_json::Value) -> (Point, Point) {
 }
 fn shift_graphic(s: &mut serde_json::Value, dx: f64, dy: f64) {
     for key in ["start", "end", "mid", "at", "center"] {
-        if let Some(p) = s[key].as_array_mut() {
-            if p.len() == 2 {
+        if let Some(p) = s[key].as_array_mut()
+            && p.len() == 2
+        {
+            p[0] = json!(p[0].as_f64().unwrap_or(0.) + dx);
+            p[1] = json!(p[1].as_f64().unwrap_or(0.) + dy);
+        }
+    }
+    if let Some(ps) = s["points"].as_array_mut() {
+        for p in ps {
+            if let Some(p) = p.as_array_mut()
+                && p.len() == 2
+            {
                 p[0] = json!(p[0].as_f64().unwrap_or(0.) + dx);
                 p[1] = json!(p[1].as_f64().unwrap_or(0.) + dy);
             }
         }
     }
-    if let Some(ps) = s["points"].as_array_mut() {
-        for p in ps {
-            if let Some(p) = p.as_array_mut() {
-                if p.len() == 2 {
-                    p[0] = json!(p[0].as_f64().unwrap_or(0.) + dx);
-                    p[1] = json!(p[1].as_f64().unwrap_or(0.) + dy);
-                }
-            }
-        }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn embedded_qualified_symbol_name_is_valid_for_source_preview() {
+        let mut def=jenga_tools::symbol_editor::symbol(&json!({"name":"Old","prefix":"U","pins":[{"number":"1","name":"Signal","at":[-12.7,0]}]})).unwrap();
+        def.items_mut()[1] = Node::string("Test:Old");
+        let editor = SymbolEditor::from_definition(def, "Test:Old", false);
+        assert_eq!(editor.name, "Old");
+        assert!(jenga_tools::symbol_editor::symbol(&editor.params()).is_ok());
     }
 }

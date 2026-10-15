@@ -20,11 +20,11 @@ pub fn executable() -> Result<PathBuf> {
         return Ok(p);
     }
     let mut candidates = vec![];
-    if let Ok(exe) = std::env::current_exe() {
-        if let Some(dir) = exe.parent() {
-            candidates.push(dir.join("backend/kicad/bin/kicad-cli.exe"));
-            candidates.push(dir.join("kicad-cli.exe"));
-        }
+    if let Ok(exe) = std::env::current_exe()
+        && let Some(dir) = exe.parent()
+    {
+        candidates.push(dir.join("backend/kicad/bin/kicad-cli.exe"));
+        candidates.push(dir.join("kicad-cli.exe"));
     }
     if std::env::current_exe().is_ok_and(|p| {
         p.ancestors()
@@ -135,10 +135,10 @@ pub fn model_roots() -> Vec<PathBuf> {
             );
         }
     }
-    if let Ok(exe) = executable() {
-        if let Some(base) = exe.parent().and_then(|p| p.parent()) {
-            roots.push(base.join("share/kicad/3dmodels"));
-        }
+    if let Ok(exe) = executable()
+        && let Some(base) = exe.parent().and_then(|p| p.parent())
+    {
+        roots.push(base.join("share/kicad/3dmodels"));
     }
     for version in ["10", "9", "8", "7", "6"] {
         if let Some(path) = std::env::var_os(format!("KICAD{version}_3DMODEL_DIR")) {
@@ -146,11 +146,11 @@ pub fn model_roots() -> Vec<PathBuf> {
         }
     }
     #[cfg(windows)]
-    if let Some(base) = std::env::var_os("ProgramFiles") {
-        if let Ok(dirs) = std::fs::read_dir(PathBuf::from(base).join("KiCad")) {
-            for d in dirs.flatten() {
-                roots.push(d.path().join("share/kicad/3dmodels"));
-            }
+    if let Some(base) = std::env::var_os("ProgramFiles")
+        && let Ok(dirs) = std::fs::read_dir(PathBuf::from(base).join("KiCad"))
+    {
+        for d in dirs.flatten() {
+            roots.push(d.path().join("share/kicad/3dmodels"));
         }
     }
     roots.retain(|p| p.is_dir());
@@ -232,10 +232,9 @@ pub fn prepared(board: &Board, dir: &Path) -> Result<PathBuf> {
                     let p = child.path();
                     if p.extension()
                         .is_some_and(|e| e == "pretty" || e == "kicad_sym")
+                        && let Some(name) = p.file_stem().and_then(|n| n.to_str())
                     {
-                        if let Some(name) = p.file_stem().and_then(|n| n.to_str()) {
-                            entries.entry(name.to_owned()).or_insert(p);
-                        }
+                        entries.entry(name.to_owned()).or_insert(p);
                     }
                 }
             }

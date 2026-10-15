@@ -17,30 +17,27 @@ impl App {
             .collect();
         if !events.is_empty() {
             for event in &events {
-                if let Some(active) = self.doc.as_ref().and_then(|d| d.path.clone()) {
-                    if !active.is_file()
-                        && matches!(event.kind.as_str(), "rename" | "delete_project")
-                        && event
-                            .old
-                            .as_ref()
-                            .and_then(|p| p.parent())
-                            .is_some_and(|folder| active.starts_with(folder))
+                if let Some(active) = self.doc.as_ref().and_then(|d| d.path.clone())
+                    && !active.is_file()
+                    && matches!(event.kind.as_str(), "rename" | "delete_project")
+                    && event
+                        .old
+                        .as_ref()
+                        .and_then(|p| p.parent())
+                        .is_some_and(|folder| active.starts_with(folder))
+                {
+                    if self.doc.as_ref().is_some_and(|d| d.dirty) {
+                        self.external_conflict = true;
+                        self.status="Project moved externally; unsaved edits are preserved. Save a separate copy.".into();
+                    } else if event.kind == "delete_project" {
+                        self.doc = None;
+                        self.workspace_ui.show = false;
+                    } else if let (Some(old), Some(new)) = (&event.old, &event.path)
+                        && let (Some(a), Some(b)) = (old.parent(), new.parent())
+                        && let Ok(relative) = active.strip_prefix(a)
+                        && let Ok(updated) = Document::open(&b.join(relative))
                     {
-                        if self.doc.as_ref().is_some_and(|d| d.dirty) {
-                            self.external_conflict = true;
-                            self.status="Project moved externally; unsaved edits are preserved. Save a separate copy.".into();
-                        } else if event.kind == "delete_project" {
-                            self.doc = None;
-                            self.workspace_ui.show = false;
-                        } else if let (Some(old), Some(new)) = (&event.old, &event.path) {
-                            if let (Some(a), Some(b)) = (old.parent(), new.parent()) {
-                                if let Ok(relative) = active.strip_prefix(a) {
-                                    if let Ok(updated) = Document::open(&b.join(relative)) {
-                                        self.set_doc(updated);
-                                    }
-                                }
-                            }
-                        }
+                        self.set_doc(updated);
                     }
                 }
                 if matches!(event.kind.as_str(), "rename" | "delete_project")
@@ -101,13 +98,12 @@ impl App {
                 self.external_conflict = true;
             } else if let Some(path) = doc.path.clone()
                 && path.is_file()
+                && let Ok(updated) = Document::open(&path)
             {
-                if let Ok(updated) = Document::open(&path) {
-                    self.set_doc(updated);
-                    self.status = "Reloaded external changes".into();
-                    self.toast_until = now + 3000;
-                    self.publish_control_snapshot();
-                }
+                self.set_doc(updated);
+                self.status = "Reloaded external changes".into();
+                self.toast_until = now + 3000;
+                self.publish_control_snapshot();
             }
         }
     }
@@ -187,12 +183,11 @@ impl App {
                 continue;
             }
             let result = self.control_request(method, &p);
-            if let Err(e) = &result {
-                if let Some(id) = p["operation_id"].as_str() {
-                    if jenga_tools::operations::status(id).is_ok_and(|r| r["status"] == "pending") {
-                        let _ = jenga_tools::operations::finish(id, &Err(anyhow::anyhow!("{e:#}")));
-                    }
-                }
+            if let Err(e) = &result
+                && let Some(id) = p["operation_id"].as_str()
+                && jenga_tools::operations::status(id).is_ok_and(|r| r["status"] == "pending")
+            {
+                let _ = jenga_tools::operations::finish(id, &Err(anyhow::anyhow!("{e:#}")));
             }
             self.publish_control_snapshot();
             let _ = job.reply.send(match result {

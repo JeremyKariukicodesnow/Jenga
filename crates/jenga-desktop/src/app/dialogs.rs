@@ -51,7 +51,8 @@ impl App {
                     let mut paper=doc.root.child("paper").map(|n|n.value(1)).unwrap_or("A4").to_owned();let before=paper.clone();
                     egui::ComboBox::from_id_salt("paper_size").selected_text(&paper).show_ui(ui,|ui|{for size in ["A0","A1","A2","A3","A4","A5","USLetter","USLegal"]{ui.selectable_value(&mut paper,size.into(),size);}});
                     if block!=original || paper!=before {self.checkpoint();let doc=self.doc.as_mut().unwrap();block.write(doc);if paper!=before{doc.root.set_child(Node::list("paper",vec![Node::string(paper)]));self.fit=true;}}
-                    ui.horizontal(|ui|{if ui.button("Save and close").clicked()&&self.save(false){finish=true;}if ui.button("Close (keep unsaved edits)").clicked(){finish=true;}});
+                    ui.horizontal(|ui|{if ui.button("Save and close").clicked()&&self.save(false){finish=true;}
+if ui.button("Close (keep unsaved edits)").clicked(){finish=true;}});
                     ui.label(RichText::new("Default worksheet borders are rendered. Custom .kicad_wks templates are retained in projects but are not rendered yet.").small().weak());
                 }
             });
@@ -61,7 +62,7 @@ impl App {
             let mut open = true;
             egui::Window::new("Rename schematic / project").open(&mut open).default_width(380.).show(ctx,|ui|{
                 ui.label("New name");ui.text_edit_singleline(&mut self.rename_name);if !self.pcb.active{ui.checkbox(&mut self.rename_project,"Rename native project and its root schematic");}
-                if self.rename_project&&!self.pcb.active{ui.checkbox(&mut self.rename_folder,"Also rename the project folder");}
+if self.rename_project&&!self.pcb.active{ui.checkbox(&mut self.rename_folder,"Also rename the project folder");}
                 ui.label(RichText::new("Existing destinations are never overwritten. Native references and UUIDs are retained.").small().weak());
                 if ui.button("Rename").clicked(){let params=serde_json::json!({"name":self.rename_name,"kind":if self.rename_project{"project"}else{"schematic"},"move_folder":self.rename_project&&self.rename_folder,"actor":"user"});
                     match self.control_request(if self.pcb.active{"pcb_rename_project"}else{"rename"},&params){Ok(_)=>{self.rename_dialog=false;self.status=format!("Renamed to {}",self.rename_name);},Err(e)=>self.fail(e)}
@@ -154,7 +155,8 @@ impl App {
             ui.horizontal(|ui|{if ui.button("Add symbol library…").clicked()&& let Some(path)=rfd::FileDialog::new().add_filter("KiCad symbol library",&["kicad_sym"]).pick_file(){let name=path.file_stem().unwrap_or_default().to_string_lossy().into_owned();self.settings.libraries.insert(0,Source{name:format!("User / {name}"),path,kind:"symbols".into()});self.persist();self.reload_libraries();}
 if ui.button("Add footprint folder…").clicked()&& let Some(path)=rfd::FileDialog::new().pick_folder(){self.settings.libraries.insert(0,Source{name:"User footprints".into(),path,kind:"footprints".into()});self.persist();self.reload_libraries();}
 if ui.button("Rescan").clicked(){self.reload_libraries();}});
-            ui.horizontal(|ui|{if ui.button("Import project asset...").clicked(){self.asset_import_dialog(false);}if ui.button("Import personal asset...").clicked(){self.asset_import_dialog(true);}});
+            ui.horizontal(|ui|{if ui.button("Import project asset...").clicked(){self.asset_import_dialog(false);}
+if ui.button("Import personal asset...").clicked(){self.asset_import_dialog(true);}});
             let extras=self.settings.libraries.clone();for(index,source)in extras.iter().enumerate(){ui.horizontal(|ui|{ui.label(&source.name);if ui.small_button("Remove user source").clicked(){self.settings.libraries.remove(index);self.persist();self.reload_libraries();}});}
             ui.add_space(8.);ui.label("Symbols and 2D footprint previews are available. Native 3D models are bundled and can be imported for project or personal use.");
         });
@@ -178,7 +180,7 @@ if ui.button("Rescan").clicked(){self.reload_libraries();}});
                         let finding=detail.clone();
                         self.selected=issue.object;
                         if let (Some(i),Some(doc))=(issue.object,&self.doc) && let Some((a,b))=Scene::from_document(doc).object_bounds(i){self.view.center=((a.0+b.0)/2.,(a.1+b.1)/2.);self.view.scale=12.;}
-                        if let Some(at)=finding.location {self.view.center=at;}
+if let Some(at)=finding.location {self.view.center=at;}
                         self.status=finding.suggestion.clone();self.active_issue=Some(finding);
                         self.show_checks=false;
                     }

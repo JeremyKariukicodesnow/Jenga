@@ -223,37 +223,37 @@ impl Board {
     pub fn inherit_native_rules(&mut self) {
         let Some(path) = &self.path else { return };
         let mut project = path.with_extension("kicad_pro");
-        if !project.is_file() {
-            if let Some(folder) = path.parent() {
-                let files: Vec<_> = std::fs::read_dir(folder)
-                    .into_iter()
-                    .flatten()
-                    .flatten()
-                    .map(|e| e.path())
-                    .filter(|p| p.extension().is_some_and(|e| e == "kicad_pro"))
-                    .collect();
-                if files.len() == 1 {
-                    project = files[0].clone();
-                }
+        if !project.is_file()
+            && let Some(folder) = path.parent()
+        {
+            let files: Vec<_> = std::fs::read_dir(folder)
+                .into_iter()
+                .flatten()
+                .flatten()
+                .map(|e| e.path())
+                .filter(|p| p.extension().is_some_and(|e| e == "kicad_pro"))
+                .collect();
+            if files.len() == 1 {
+                project = files[0].clone();
             }
         }
-        if let Ok(bytes) = std::fs::read(project) {
-            if let Ok(v) = serde_json::from_slice::<Value>(&bytes) {
-                let r = &v["board"]["design_settings"]["rules"];
-                if let Some(x) = r["min_clearance"].as_f64() {
+        if let Ok(bytes) = std::fs::read(project)
+            && let Ok(v) = serde_json::from_slice::<Value>(&bytes)
+        {
+            let r = &v["board"]["design_settings"]["rules"];
+            if let Some(x) = r["min_clearance"].as_f64() {
+                self.rules.clearance = self.rules.clearance.max(x);
+            }
+            if let Some(x) = r["min_track_width"].as_f64() {
+                self.rules.track_width = self.rules.track_width.max(x);
+            }
+            for class in v["net_settings"]["classes"]
+                .as_array()
+                .into_iter()
+                .flatten()
+            {
+                if let Some(x) = class["clearance"].as_f64() {
                     self.rules.clearance = self.rules.clearance.max(x);
-                }
-                if let Some(x) = r["min_track_width"].as_f64() {
-                    self.rules.track_width = self.rules.track_width.max(x);
-                }
-                for class in v["net_settings"]["classes"]
-                    .as_array()
-                    .into_iter()
-                    .flatten()
-                {
-                    if let Some(x) = class["clearance"].as_f64() {
-                        self.rules.clearance = self.rules.clearance.max(x);
-                    }
                 }
             }
         }
@@ -398,20 +398,18 @@ impl Board {
         let project_revision = std::fs::read_to_string(path.with_extension("kicad_pro"))
             .ok()
             .map(|s| revision_text(&s));
-        if meta["rules"].is_null()
+        if (meta["rules"].is_null()
             || (meta["project_revision"].as_str().is_some()
-                && meta["project_revision"] != json!(project_revision))
+                && meta["project_revision"] != json!(project_revision)))
+            && let Ok(s) = std::fs::read(path.with_extension("kicad_pro"))
+            && let Ok(pro) = serde_json::from_slice::<Value>(&s)
         {
-            if let Ok(s) = std::fs::read(path.with_extension("kicad_pro")) {
-                if let Ok(pro) = serde_json::from_slice::<Value>(&s) {
-                    let r = &pro["board"]["design_settings"]["rules"];
-                    if let Some(v) = r["min_clearance"].as_f64().filter(|v| *v > 0.) {
-                        rules.clearance = v;
-                    }
-                    if let Some(v) = r["min_track_width"].as_f64().filter(|v| *v > 0.) {
-                        rules.track_width = v;
-                    }
-                }
+            let r = &pro["board"]["design_settings"]["rules"];
+            if let Some(v) = r["min_clearance"].as_f64().filter(|v| *v > 0.) {
+                rules.clearance = v;
+            }
+            if let Some(v) = r["min_track_width"].as_f64().filter(|v| *v > 0.) {
+                rules.track_width = v;
             }
         }
         Ok(Self {
@@ -450,15 +448,14 @@ impl Board {
     }
     pub fn disk_changed(&self) -> Result<bool> {
         if let (Some(path), Some(stamp)) = (&self.path, &self.disk_revision) {
-            if let Some(pro_stamp) = &self.project_revision {
-                if std::fs::read_to_string(path.with_extension("kicad_pro"))
+            if let Some(pro_stamp) = &self.project_revision
+                && std::fs::read_to_string(path.with_extension("kicad_pro"))
                     .map(|s| revision_text(&s))
                     .ok()
                     .as_ref()
                     != Some(pro_stamp)
-                {
-                    return Ok(true);
-                }
+            {
+                return Ok(true);
             }
             return Ok(!path.is_file() || revision_text(&std::fs::read_to_string(path)?) != *stamp);
         }
@@ -603,10 +600,10 @@ impl Board {
             .iter()
             .filter(|n| matches!(n.name(), "segment" | "arc" | "via" | "zone"))
         {
-            if let Some(net) = n.child("net") {
-                if matches!(net.items().get(1), Some(Node::String(_))) {
-                    nets.insert(net_code(n), net.value(1).to_owned());
-                }
+            if let Some(net) = n.child("net")
+                && matches!(net.items().get(1), Some(Node::String(_)))
+            {
+                nets.insert(net_code(n), net.value(1).to_owned());
             }
         }
         nets.extend(self.extra_nets.clone());
@@ -1196,25 +1193,23 @@ impl Board {
                         });
                     }
                 }
-                "gr_text" => {
-                    if show(layer(n)) {
-                        s.draws.push(Draw {
-                            shape: Shape::Text {
-                                at: point(n, "at"),
-                                text: n.value(1).into(),
-                                size: n
-                                    .child("effects")
-                                    .and_then(|n| n.child("font"))
-                                    .and_then(|n| n.child("size"))
-                                    .map(|n| n.number(1))
-                                    .unwrap_or(1.),
-                                angle: angle(n),
-                                color: color(layer(n)),
-                                left: false,
-                            },
-                            object: Some(i),
-                        });
-                    }
+                "gr_text" if show(layer(n)) => {
+                    s.draws.push(Draw {
+                        shape: Shape::Text {
+                            at: point(n, "at"),
+                            text: n.value(1).into(),
+                            size: n
+                                .child("effects")
+                                .and_then(|n| n.child("font"))
+                                .and_then(|n| n.child("size"))
+                                .map(|n| n.number(1))
+                                .unwrap_or(1.),
+                            angle: angle(n),
+                            color: color(layer(n)),
+                            left: false,
+                        },
+                        object: Some(i),
+                    });
                 }
                 _ => {}
             }

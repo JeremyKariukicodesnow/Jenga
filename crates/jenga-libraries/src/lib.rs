@@ -263,10 +263,10 @@ impl Libraries {
             return resolve(&parse(&fs::read_to_string(&path)?)?, name, 0);
         }
         if !self.files.contains_key(&path) {
-            if self.files.len() >= 8 {
-                if let Some(old) = self.files.keys().next().cloned() {
-                    self.files.remove(&old);
-                }
+            if self.files.len() >= 8
+                && let Some(old) = self.files.keys().next().cloned()
+            {
+                self.files.remove(&old);
             }
             self.files
                 .insert(path.clone(), parse(&fs::read_to_string(&path)?)?);

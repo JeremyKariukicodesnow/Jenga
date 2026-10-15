@@ -188,7 +188,7 @@ fn pdf_page(doc: &Document) -> Result<(f64, f64, String)> {
     Ok((w * k, h, stream))
 }
 pub fn pdf(doc: &Document, path: &Path) -> Result<()> {
-    pdf_pages(&[doc.clone()], path)
+    pdf_pages(std::slice::from_ref(doc), path)
 }
 /// Export a selected, ordered collection of native schematic pages as one PDF.
 pub fn pdf_pages(docs: &[Document], path: &Path) -> Result<()> {

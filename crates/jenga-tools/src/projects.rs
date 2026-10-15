@@ -194,15 +194,15 @@ pub fn rename(doc: &mut Document, params: &Value) -> Result<Value> {
             {
                 let before = fs::read(file.path())?;
                 let mut value: Value = serde_json::from_slice(&before)?;
-                if let Some(link) = value["schematic"].as_str().map(std::path::PathBuf::from) {
-                    if let Ok(relative) = link.strip_prefix(&dir) {
-                        let path = if link == oldroot {
-                            newroot.clone()
-                        } else {
-                            newdir.join(relative)
-                        };
-                        value["schematic"] = json!(path);
-                    }
+                if let Some(link) = value["schematic"].as_str().map(std::path::PathBuf::from)
+                    && let Ok(relative) = link.strip_prefix(&dir)
+                {
+                    let path = if link == oldroot {
+                        newroot.clone()
+                    } else {
+                        newdir.join(relative)
+                    };
+                    value["schematic"] = json!(path);
                 }
                 let target = newdir.join(".jenga/boards").join(
                     if file.path().file_stem() == oldroot.file_stem() {
@@ -356,11 +356,11 @@ pub fn copy_project(doc: &Document, folder: &std::path::Path, name: &str) -> Res
             .filter(|e| e.path().extension().is_some_and(|e| e == "json"))
         {
             let mut value: Value = serde_json::from_slice(&fs::read(file.path())?)?;
-            if let Some(link) = value["schematic"].as_str().map(std::path::PathBuf::from) {
-                if let Ok(relative) = link.strip_prefix(source) {
-                    value["schematic"] = json!(target.join(relative));
-                    atomic_write(&file.path(), &serde_json::to_vec_pretty(&value)?, true)?;
-                }
+            if let Some(link) = value["schematic"].as_str().map(std::path::PathBuf::from)
+                && let Ok(relative) = link.strip_prefix(source)
+            {
+                value["schematic"] = json!(target.join(relative));
+                atomic_write(&file.path(), &serde_json::to_vec_pretty(&value)?, true)?;
             }
         }
     }
