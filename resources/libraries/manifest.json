@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "license": "CC-BY-SA-4.0 WITH KiCad-libraries-exception",
+  "models_included": false,
+  "sources": [
+    {
+      "kind": "symbols",
+      "upstream": "https://gitlab.com/kicad/libraries/kicad-symbols",
+      "installation": "C:\\Program Files\\KiCad\\10.0",
+      "count": 224,
+      "bytes": 244497729.0
+    },
+    {
+      "kind": "footprints",
+      "upstream": "https://gitlab.com/kicad/libraries/kicad-footprints",
+      "installation": "C:\\Program Files\\KiCad\\10.0",
+      "count": 15450,
+      "bytes": 165563353.0
+    }
+  ]
+}
