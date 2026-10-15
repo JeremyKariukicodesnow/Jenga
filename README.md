@@ -23,6 +23,28 @@ The local build produces an installer, portable ZIP, corresponding Jenga/Rust de
 
 The complete Windows package includes symbols, footprints, 3D library data and the native KiCad backend; a separate KiCad installation is not required. This makes the offline package relatively large. Windows binaries are currently unsigned; there is no automatic online updater or established security audit.
 
+## Why Jenga?
+
+Jenga aims to make an electronics task useful in one workspace: draw the circuit, inspect connectivity, make a board, preview the assembly and export the result. For assistants, the same project has explicit tool targets, operation IDs and reviewable changes, reducing fragile screen-clicking and custom Python orchestration. People can still work directly in the desktop interface.
+
+The stable connection bridge addresses a common interruption: after an app upgrade/downgrade, the assistant should recover its worker without the user repeatedly saying “reconnect.” Revision checks and previews protect human edits; they do not guarantee that an AI's electrical choices are correct.
+
+It is a promising, useful prototype with substantial implemented workflows. **It is not perfect:** complex routing, advanced KiCad interoperability, engineering review and clean-machine coverage still need work. More generated tracks or an attractive 3D image do not prove a design is ready to manufacture.
+
+## Requirements
+
+| Requirement | Current position |
+| --- | --- |
+| Operating system | Windows x64 binary release; Windows 10/11 are the intended desktop targets. Broader clean-machine and driver coverage remains pending. No validated Linux/macOS binary releases yet. |
+| Graphics | A working graphics driver for the OpenGL-based desktop renderer. VM/remote-desktop graphics compatibility is not comprehensively tested. |
+| Disk | The complete extracted 0.8.0 payload is approximately **4.1 GB**; allow additional space for the download, installer staging, projects and exports. This is a measured payload size, not a universal minimum free-space guarantee. |
+| Memory | Depends on board complexity and model size. No verified minimum-RAM figure or controlled performance benchmark is published yet. |
+| KiCad | **Not required for the complete Jenga Windows package.** It includes the native backend and symbol, footprint and 3D libraries. A source-only checkout excludes those large binaries/assets and needs preparation steps. |
+| AI | Optional. Manual editing requires no AI account or API key. Automation requires a local-capable assistant/client; its own provider/account and network requirements apply. |
+| Internet | Not needed for local editing with the complete offline package. Needed for downloads, web asset discovery and any externally hosted assistant that requires it. |
+
+Installing a binary does not require Rust or compiler tools; those are development requirements only. Download all of the portable package, rather than copying just Jenga.exe.
+
 ## What you can do
 
 | Area | Available workflows |
@@ -56,6 +78,8 @@ jenga-cli setup --client Codex --workspace "$env:USERPROFILE\Documents" --instal
 ```
 
 Setup registers a stable `jenga-connect.exe` bridge outside the replaced application directory. Existing assistants need one restart to adopt it. Later worker upgrades/downgrades reconnect automatically without a new pasted configuration. Hosts that cannot refresh MCP tool lists may still need a restart. Interrupted edits are never replayed blindly: inspect the retained operation ID, then reopen the intended saved document if needed.
+
+**Assistant setup:** built-in registration helpers cover Codex, Claude Code, Cursor and Antigravity. Other local MCP stdio clients can use the generated generic configuration; assistants with local command execution can use the CLI/JSON API. Browser-only chat does not automatically have access to local Jenga files. See [which assistants and setup recipes](docs/AI_ASSISTANTS.md).
 
 The assistant supplies the engineering reasoning. The bundled skill covers exact part/datasheet evidence, power budgets, full visible wiring, readable labels, ground/antenna review and reusing appropriately licensed manufacturer/community assets. See [automation](docs/AUTOMATION.md) and the [skill](docs/assistant-skill/jenga-design/SKILL.md).
 
