@@ -1,0 +1,28 @@
+name: Bug report
+description: Report a reproducible problem; use private reporting for vulnerabilities.
+labels: [bug, needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Jenga version and operating system
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Minimal reproduction and sanitized fixture
+      description: Do not upload secrets, personal/customer designs or unlicensed third-party files.
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Diagnostics and checks performed
+      description: Include native ERC/DRC findings if relevant; redact paths and private data.

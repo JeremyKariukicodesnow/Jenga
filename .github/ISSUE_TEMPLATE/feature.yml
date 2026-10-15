@@ -1,0 +1,14 @@
+name: Feature request
+description: Describe a workflow problem and a concrete improvement.
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: use-case
+    attributes:
+      label: User problem and proposed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria, alternatives and compatibility concerns

@@ -1,0 +1,8 @@
+Native backend: unmodified official KiCad 10.0.6 Windows CLI and runtime DLLs.
+Separate process backend; native files are the interchange boundary.
+Licenses and third-party attribution: COPYRIGHT.txt.
+Corresponding KiCad source: https://gitlab.com/kicad/code/kicad/-/tree/10.0.6
+Windows dependency build recipes: https://gitlab.com/kicad/packaging/kicad-win-builder
+OpenCascade source: https://github.com/Open-Cascade-SAS/OCCT
+wxWidgets source: https://github.com/wxWidgets/wxWidgets
+Official component 3D libraries are included separately in libraries/3dmodels under the KiCad library license and exception; see libraries/licenses and manifest.json.

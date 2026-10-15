@@ -1,0 +1,37 @@
+name: Rust checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  windows:
+    name: Windows format and tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install stable Rust
+        run: rustup update stable
+      - name: Formatting
+        run: cargo fmt --all --check
+      - name: Tests
+        run: cargo test --workspace --locked
+      - name: Release executable
+        run: cargo build --release --locked
+  lint:
+    name: Clippy advisory — existing lint debt
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - run: rustup update stable
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings

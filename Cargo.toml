@@ -1,0 +1,20 @@
+[workspace]
+members = ["crates/jenga-core", "crates/jenga-libraries", "crates/jenga-desktop", "crates/jenga-tools"]
+resolver = "2"
+
+[workspace.package]
+version = "0.8.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+rust-version = "1.92"
+
+[workspace.dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+uuid = { version = "1", features = ["v4"] }
+tempfile = "3"
+
+[profile.release]
+lto = "thin"
+strip = true
