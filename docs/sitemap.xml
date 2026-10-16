@@ -1,2 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://jenga.sparkfield.co.ke/</loc></url><url><loc>https://jenga.sparkfield.co.ke/download/</loc></url></urlset>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url><loc>https://jenga.sparkfield.co.ke/</loc><image:image><image:loc>https://jenga.sparkfield.co.ke/assets/projects/terminal-3d.png</image:loc></image:image></url>
+  <url><loc>https://jenga.sparkfield.co.ke/download/</loc></url>
+  <url><loc>https://jenga.sparkfield.co.ke/projects/pulse-generator/</loc><image:image><image:loc>https://jenga.sparkfield.co.ke/assets/projects/555-schematic.png</image:loc></image:image></url>
+  <url><loc>https://jenga.sparkfield.co.ke/projects/maize-factory/</loc><image:image><image:loc>https://jenga.sparkfield.co.ke/assets/projects/maize-power.png</image:loc></image:image></url>
+  <url><loc>https://jenga.sparkfield.co.ke/projects/access-terminal/</loc><image:image><image:loc>https://jenga.sparkfield.co.ke/assets/projects/terminal-pcb.png</image:loc></image:image></url>
+</urlset>
