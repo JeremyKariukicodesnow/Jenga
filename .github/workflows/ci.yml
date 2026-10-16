@@ -25,6 +25,8 @@ jobs:
         run: node --test scripts/test-release-links.mjs
       - name: Download alias integrity
         run: ./scripts/test-download-aliases.ps1
+      - name: Native runtime notice coverage
+        run: ./scripts/test-native-notices.ps1
       - name: Tests
         run: cargo test --workspace --locked
       - name: Release executable

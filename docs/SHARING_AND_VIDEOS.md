@@ -2,7 +2,7 @@
 
 ## Current availability
 
-Jenga source is public. Windows 0.8.0 binary distribution remains a **draft** pending PUBLIC_RELEASE_CHECKLIST.md. The URLs below are the intended permanent endpoints; a missing draft-only download is not a broken public release. Do not advertise an active installer until it has been published and tested anonymously.
+Jenga 0.8.0 is a **public early-access prerelease** with a full Windows EXE, matching preserved source, SHA-256 checksums and native notice/source supplement. Anonymous EXE download was verified. Historical releases are available separately. The permanent page selects the highest published installer; GitHub’s `/latest` routes select stable releases only. See PUBLIC_RELEASE_CHECKLIST.md for evidence and future checks.
 
 ## Permanent links
 
@@ -23,11 +23,11 @@ The GitHub-native links below refer to **stable** releases only:
 | Latest stable source bundle | https://github.com/JeremyKariukicodesnow/Jenga/releases/latest/download/Jenga-source.zip |
 | Latest stable checksums | https://github.com/JeremyKariukicodesnow/Jenga/releases/latest/download/SHA256SUMS |
 
-GitHub's `latest` endpoint does not select drafts or prereleases. A published early-access prerelease is available from **All releases**, with a version-specific direct URL such as `https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.0/Jenga-windows-x64-Setup.exe`. That URL is not public while its release remains a draft. Do not relabel a preview as stable just to make a link work.
+GitHub's `latest` endpoint does not select drafts or prereleases. A published early-access prerelease is available from **All releases**, with a version-specific direct URL such as `https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.0/Jenga-windows-x64-Setup.exe`. The 0.8.0 canonical EXE URL is public. Source and native notices are attached on its release page. Do not relabel a preview as stable just to make a link work.
 
 The fixed asset filename is deliberate: versioned filenames cannot share the same `/latest/download/` URL across versions. `prepare-download-aliases.ps1` creates byte-identical canonical aliases alongside the versioned files and includes both names in SHA256SUMS. Hard links conserve local build space where supported; other volumes use copies. Stale aliases are rejected rather than silently replaced. Building aliases never uploads/publishes a release or clears its review gate.
 
-After the release checklist is complete, upload the canonical assets, retained versioned artifacts and SHA256SUMS to the same release as their matching source/notices. Maintain versioned artifacts for auditability, verify anonymous downloads and hashes, and never replace published content silently. Draft-only assets and URLs are not usable by ordinary website visitors.
+After the release checklist is complete, upload the canonical assets, retained versioned artifacts and SHA256SUMS to the same release as their matching source/notices. Maintain versioned artifacts for auditability, verify anonymous downloads and hashes, and never replace published content silently. Draft-only assets and URLs are not usable by ordinary website visitors. The published 0.8.0 EXE/source bytes are the preserved original artifacts; later repository-main changes are not silently presented as a rebuild of that release.
 
 ## On your website
 

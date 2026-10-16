@@ -19,6 +19,8 @@ Corresponding KiCad source: https://gitlab.com/kicad/code/kicad/-/tree/$backendV
 Windows dependency build recipes: https://gitlab.com/kicad/packaging/kicad-win-builder
 OpenCascade source: https://github.com/Open-Cascade-SAS/OCCT
 wxWidgets source: https://github.com/wxWidgets/wxWidgets
+Exact native component notices, pinned source locations and dependency recipes: NOTICES-SOURCES.zip.
+Packaging verifies that every native DLL/EXE still matches that reviewed inventory; an upstream change needs updated matching material.
 Official component 3D libraries are included separately in libraries/3dmodels under the KiCad library license and exception; see libraries/licenses and manifest.json.
 "@ | Set-Content -LiteralPath (Join-Path $destination 'SOURCE_AND_LICENSES.txt') -Encoding utf8
 New-Item -ItemType Directory -Force -Path (Join-Path $destination 'share\kicad') | Out-Null

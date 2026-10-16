@@ -4,3 +4,6 @@
 *.pdf binary
 *.glb binary
 *.zip binary
+
+# Native notice/source supplement is an immutable archive, not text.
+*.zip binary
