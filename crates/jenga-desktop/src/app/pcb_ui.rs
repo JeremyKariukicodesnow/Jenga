@@ -120,8 +120,8 @@ impl Default for PcbUi {
             zoom: 1.,
             pan: Vec2::ZERO,
             solid: true,
-            brightness: 1.2,
-            ambient: 0.7,
+            brightness: 0.9,
+            ambient: 0.5,
         }
     }
 }
