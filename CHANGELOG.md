@@ -1,3 +1,8 @@
+# 0.8.1
+
+- Darker, more physical PCB assembly presentation in the desktop 3D viewer, with restrained default brightness and ambient illumination for clearer solder-mask, copper and component contrast.
+- 3D assembly views continue to export with the same brightness and ambient settings used for review.
+
 # 0.8.0
 
 - Stable assistant connection bridge survives installed-worker restarts and refreshes MCP tools after upgrade/downgrade. Interrupted requests are never replayed.

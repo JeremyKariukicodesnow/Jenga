@@ -1,0 +1,27 @@
+# Jenga
+
+> Open-source Windows electronics workspace for creating KiCad-compatible schematics, PCB layouts, reusable symbols and footprints, and 3D assemblies.
+
+Jenga is maintained by Jeremy Kariuki. It supports direct desktop editing and deterministic MCP, CLI and JSON operations for external AI assistants. Jenga does not include an AI model or make engineering claims on an assistant's behalf.
+
+## Important pages
+
+- Website: https://jenga.sparkfield.co.ke/
+- Download: https://jenga.sparkfield.co.ke/download/
+- AI and open-source CAD guide: https://jenga.sparkfield.co.ke/ai-cad/
+- Source repository: https://github.com/JeremyKariukicodesnow/Jenga
+- Assistant connection guide: https://github.com/JeremyKariukicodesnow/Jenga/blob/main/docs/AI_ASSISTANTS.md
+- PCB guide: https://github.com/JeremyKariukicodesnow/Jenga/blob/main/docs/PCB_GUIDE.md
+- Releases: https://github.com/JeremyKariukicodesnow/Jenga/releases
+
+## Capabilities
+
+- Native modern KiCad project, schematic and PCB exchange.
+- Optional schematic-to-PCB linkage; PCB-only projects are supported.
+- Symbols, footprints and compatible 3D models in project or personal libraries.
+- Interactive 3D assembly view plus PNG, PDF and CAD-model exports.
+- Guarded routing, placement, verification, DRC handoff and durable operation status for assistants.
+
+## Safety and scope
+
+Jenga is early-access CAD. Outputs and 3D previews are review artifacts, not proof of manufacturability, electrical safety or product compliance. Verify component data, power budgets, ERC/DRC, layout and a physical prototype before fabrication.

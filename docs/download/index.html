@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="en">
-<head>
+<head><meta name="google-site-verification" content="Wvjw74EFMbHPNN2rj-GMt-mv5s1mRfAAlqG1wa6vgxw">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Download the latest published Jenga Windows installer or choose an older release.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
-  <title>Download Jenga</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.github.com; worker-src blob:; base-uri 'none'; form-action 'none'">
+  <title>Download Jenga</title><link rel="canonical" href="https://jenga.sparkfield.co.ke/download/">
   <meta name="theme-color" content="#f7f5ed">
   <link rel="icon" href="../assets/jenga.ico">
   <meta property="og:title" content="Jenga — your next circuit starts here">
@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="../site.css">
   <script type="module" src="page.mjs"></script>
-  <script type="module" src="motion.mjs"></script>
+  <script type="module" src="../visuals.mjs"></script><script type="module" src="../assets/vendor/model-viewer.min.js"></script><script type="module" src="../site.mjs"></script>
 </head>
 <body>
   <div class="blueprint" aria-hidden="true">
@@ -25,7 +25,7 @@
       <g class="cubes" fill="none"><path d="M1130 480l55-32 55 32v64l-55 32-55-32zm0 0l55 32 55-32m-55 32v64"/><path d="M80 130l35-20 35 20v40l-35 20-35-20zm0 0l35 20 35-20m-35 20v40"/></g>
     </svg>
   </div>
-  <header><a class="brand" href="../" aria-label="Jenga home"><img class="app-logo" src="../assets/jenga-logo.png" alt="" width="56" height="56"><img class="wordmark" src="../assets/jenga-wordmark.svg" alt="Jenga" width="142" height="34"></a><nav aria-label="Main navigation"><a href="https://github.com/JeremyKariukicodesnow/Jenga">Source</a><a href="https://github.com/JeremyKariukicodesnow/Jenga/releases">All releases <span aria-hidden="true">↗</span></a><button id="motion" class="motion" type="button" aria-pressed="false" hidden>Pause animation</button></nav></header>
+  <header><a class="brand" href="../" aria-label="Jenga home"><img class="app-logo" src="../assets/jenga-logo.png" alt="" width="56" height="56"><img class="wordmark" src="../assets/jenga-wordmark.svg" alt="Jenga" width="142" height="34"></a><nav aria-label="Main navigation"><a class="nav-home" href="https://jenga.sparkfield.co.ke/">← Back to home</a><a href="https://jenga.sparkfield.co.ke/#features">Features</a><a href="https://github.com/JeremyKariukicodesnow/Jenga">Source</a><a href="https://github.com/JeremyKariukicodesnow/Jenga/releases">All releases <span aria-hidden="true">↗</span></a></nav></header>
   <main>
     <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> SCHEMATICS <span>·</span> PCB <span>·</span> 3D</p>
     <p><a href="https://jenga.sparkfield.co.ke/">← Explore Jenga &amp; project stories</a></p>
@@ -41,7 +41,7 @@
       <button id="copy" type="button">Copy shareable download link</button><span id="copy-status" role="status"></span>
       <noscript><p>JavaScript is needed to select the newest installer. You can always <a href="https://github.com/JeremyKariukicodesnow/Jenga/releases">choose a published release manually</a>.</p></noscript>
     </section>
-    <figure class="artwork"><div class="artwork-bar"><span><i aria-hidden="true"></i> THE IDEA → THE BOARD</span><span>JENGA WORKSPACE</span></div><div class="hero-frame"><img class="hero" src="../assets/jenga-hero.png" alt="Conceptual illustration of a schematic flowing into a green printed circuit board" width="1672" height="941" decoding="async"></div><figcaption>Conceptual artwork, not an application screenshot or verified circuit.</figcaption></figure>
+    <section class="artwork"><div class="artwork-bar"><span>EXPLORE AN ACTUAL JENGA PROJECT</span><span>5 V / 555 PULSE GENERATOR</span></div><div id="hero-gallery"></div><p class="details">An actual exported assembly, with schematic, PCB and interactive 3D views. Development example, subject to engineering review.</p></section>
     <section class="notes"><div><h2>One link, current installer</h2><p>This page selects the highest published version, including early-access releases. It links directly to that release’s EXE. Older installers remain attached to their original releases.</p></div><div><h2>Useful, still evolving</h2><p>Jenga is early-access software. Keep backups and verify your designs. A successful export or attractive 3D model does not establish manufacturing readiness.</p></div></section>
     <nav class="footer-links" aria-label="Project resources"><a href="https://github.com/JeremyKariukicodesnow/Jenga#requirements">Requirements</a><a href="https://github.com/JeremyKariukicodesnow/Jenga/blob/main/docs/AI_ASSISTANTS.md">AI setup</a><a href="https://github.com/JeremyKariukicodesnow/Jenga/blob/main/THIRD_PARTY_NOTICES.md">Licenses &amp; credits</a><a href="https://github.com/JeremyKariukicodesnow/Jenga">Source on GitHub</a></nav>
   </main>

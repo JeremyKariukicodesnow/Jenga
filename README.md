@@ -3,7 +3,7 @@
 ![Jenga: schematics, PCB and 3D](docs/assets/jenga-hero.png)
 
 [![Rust checks](https://github.com/JeremyKariukicodesnow/Jenga/actions/workflows/ci.yml/badge.svg)](https://github.com/JeremyKariukicodesnow/Jenga/actions/workflows/ci.yml)
-![Version](https://img.shields.io/badge/version-0.8.0-blue)
+![Version](https://img.shields.io/badge/version-0.8.1-blue)
 ![Status](https://img.shields.io/badge/status-early_access-orange)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 
@@ -15,18 +15,17 @@ Created and maintained by **Jeremy ([@JeremyKariukicodesnow](https://github.com/
 
 ## Status and downloads
 
-**0.8.0 is early-access software for Windows x64.** It is suitable for evaluation and contributions; it is not a guarantee of production-ready PCB designs. Save backups, inspect exports and run native ERC/DRC before relying on a design. Electrical, thermal, mechanical and bench validation remain the designer's responsibility.
+**0.8.1 is early-access software for Windows x64.** It is suitable for evaluation and contributions; it is not a guarantee of production-ready PCB designs. Save backups, inspect exports and run native ERC/DRC before relying on a design. Electrical, thermal, mechanical and bench validation remain the designer's responsibility.
 
-[Download latest Windows installer](https://jeremykariukicodesnow.github.io/Jenga/download/?start=1) · [Older versions / all releases](https://github.com/JeremyKariukicodesnow/Jenga/releases) · [0.8.0 early-access release](https://github.com/JeremyKariukicodesnow/Jenga/releases/tag/v0.8.0) · [User guide](docs/USER_GUIDE.md) · [PCB guide](docs/PCB_GUIDE.md) · [Validation evidence and limits](docs/RELEASE_080_VALIDATION.md)
+[Download latest Windows installer](https://jenga.sparkfield.co.ke/download/?start=1) · [Older versions / all releases](https://github.com/JeremyKariukicodesnow/Jenga/releases) · [0.8.1 early-access release](https://github.com/JeremyKariukicodesnow/Jenga/releases/tag/v0.8.1) · [User guide](docs/USER_GUIDE.md) · [PCB guide](docs/PCB_GUIDE.md) · [Validation evidence and limits](docs/RELEASE_080_VALIDATION.md)
 
-**One permanent download link:** https://jeremykariukicodesnow.github.io/Jenga/download/?start=1 selects the highest published version, including early-access builds, and starts its EXE download. The public 0.8.0 early-access EXE is available now. [Older versions](https://github.com/JeremyKariukicodesnow/Jenga/releases) remain available separately; new releases never replace their original assets.
+**One permanent download link:** https://jenga.sparkfield.co.ke/download/?start=1 selects the highest published version, including early-access builds, and starts its EXE download. The public 0.8.1 early-access EXE is available now. [Older versions](https://github.com/JeremyKariukicodesnow/Jenga/releases) remain available separately; new releases never replace their original assets.
 
-**Direct 0.8.0 downloads:**
+**Direct 0.8.1 downloads:**
 
-- [Windows installer (.exe)](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.0/Jenga-windows-x64-Setup.exe)
-- [Matching original source and Rust dependency source](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.0/Jenga-0.8.0-source.zip)
-- [Checksums](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.0/SHA256SUMS)
-- [Native runtime notices and source/build access](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.0/Jenga-native-10.0.6-NOTICES-SOURCES.zip)
+- [Windows installer (.exe)](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.1/Jenga-windows-x64-Setup.exe)
+- [Matching original source and Rust dependency source](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.1/Jenga-0.8.1-source.zip)
+- [Checksums](https://github.com/JeremyKariukicodesnow/Jenga/releases/download/v0.8.1/SHA256SUMS)
 
 Use the permanent download-page link for the newest published build, including previews. The version-specific links above keep the original 0.8.0 files. GitHub's `/latest` endpoint excludes prereleases; the [sharing/video guide](docs/SHARING_AND_VIDEOS.md) explains website buttons and future stable-release links. No demo video is uploaded yet.
 
