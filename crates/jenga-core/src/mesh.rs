@@ -8,6 +8,8 @@ pub type V3 = [f64; 3];
 pub struct Triangle {
     pub vertices: [V3; 3],
     pub color: [u8; 3],
+    /// Imported smooth normals, in the same Z-up coordinate system as vertices.
+    pub normals: Option<[V3; 3]>,
     pub object: Option<String>,
 }
 #[derive(Clone, Default, Debug)]
@@ -83,6 +85,7 @@ impl Mesh {
             self.triangles.push(Triangle {
                 vertices: [v[f[0]], v[f[1]], v[f[2]]],
                 color,
+                normals: None,
                 object: object.clone(),
             });
         }
@@ -140,6 +143,7 @@ impl Mesh {
                 m.triangles.push(Triangle {
                     vertices: v,
                     color: [145, 150, 155],
+                    normals: None,
                     object: None,
                 });
             }
@@ -161,6 +165,7 @@ impl Mesh {
                 m.triangles.push(Triangle {
                     vertices: [v[0], v[1], v[2]],
                     color: [145, 150, 155],
+                    normals: None,
                     object: None,
                 });
             }
@@ -202,6 +207,7 @@ impl Mesh {
                     m.triangles.push(Triangle {
                         vertices: [vertices[idx[0]], vertices[idx[j]], vertices[idx[j + 1]]],
                         color: [145, 150, 155],
+                        normals: None,
                         object: None,
                     });
                 }
@@ -387,6 +393,19 @@ impl Mesh {
                     } else {
                         (0..positions.len()).collect()
                     };
+                    let normals = p["attributes"]["NORMAL"]
+                        .as_u64()
+                        .map(|i| accessor(root, bin, i as usize))
+                        .transpose()?;
+                    if let Some(normals) = &normals {
+                        ensure!(
+                            normals.len() == positions.len()
+                                && normals
+                                    .iter()
+                                    .all(|n| n.len() == 3 && n.iter().all(|v| v.is_finite())),
+                            "GLB NORMAL must contain one finite VEC3 per position"
+                        );
+                    }
                     let material = &root["materials"][p["material"].as_u64().unwrap_or(0) as usize]
                         ["pbrMetallicRoughness"]["baseColorFactor"];
                     let color = std::array::from_fn(|i| {
@@ -416,6 +435,15 @@ impl Mesh {
                         m.triangles.push(Triangle {
                             vertices: v,
                             color,
+                            normals: normals.as_ref().map(|normals| {
+                                let mut result = [[0.; 3]; 3];
+                                for j in 0..3 {
+                                    if let Some(n) = normals.get(idx[j]).filter(|n| n.len() == 3) {
+                                        result[j] = transform_normal(mat, [n[0], n[1], n[2]]);
+                                    }
+                                }
+                                result
+                            }),
                             object: n["name"].as_str().map(str::to_owned),
                         });
                         ensure!(
@@ -503,6 +531,20 @@ pub fn unit(a: V3) -> V3 {
     a.map(|x| x / l)
 }
 
+/// Inverse-transpose transform preserves normals under non-uniform node scale.
+fn transform_normal(m: [f64; 16], n: V3) -> V3 {
+    let a = [m[0], m[1], m[2]];
+    let b = [m[4], m[5], m[6]];
+    let c = [m[8], m[9], m[10]];
+    let x = cross(b, c);
+    let y = cross(c, a);
+    let z = cross(a, b);
+    let determinant = a[0] * x[0] + a[1] * x[1] + a[2] * x[2];
+    let sign = if determinant < 0. { -1. } else { 1. };
+    let v: V3 = std::array::from_fn(|i| sign * (x[i] * n[0] + y[i] * n[1] + z[i] * n[2]));
+    unit([v[0], -v[2], v[1]])
+}
+
 /// glTF baseColorFactor is linear; display textures are sRGB.
 pub fn linear_to_srgb(c: f64) -> u8 {
     let c = c.clamp(0., 1.);
@@ -514,11 +556,15 @@ pub fn linear_to_srgb(c: f64) -> u8 {
         .round() as u8
 }
 pub fn lit_color(color: [u8; 3], normal: [f64; 3], exposure: f64, ambient: f64) -> [u8; 3] {
-    let light = ambient
-        + (1. - ambient)
-            * (normal[0] * 0.3 + normal[1] * 0.4 + normal[2] * 0.85)
-                .abs()
-                .min(1.);
+    // Studio key, fill and rim lights. Opposing faces must not receive the
+    // identical light produced by the previous absolute dot product.
+    let n = unit(normal);
+    let dot = |l: V3| (n[0] * l[0] + n[1] * l[1] + n[2] * l[2]).max(0.);
+    let light = ambient.clamp(0., 1.) * 0.65
+        + (1. - ambient.clamp(0., 1.) * 0.5)
+            * (0.75 * dot(unit([0.3, -0.4, -0.85]))
+                + 0.3 * dot(unit([-0.8, 0.2, -0.4]))
+                + 0.2 * dot(unit([0.2, 0.9, 0.5])));
     color.map(|v| {
         let c = f64::from(v) / 255.;
         let linear = if c <= 0.04045 {
@@ -531,6 +577,24 @@ pub fn lit_color(color: [u8; 3], normal: [f64; 3], exposure: f64, ambient: f64) 
 }
 #[cfg(test)]
 mod lighting_tests {
+    #[test]
+    fn normals_use_inverse_transpose_and_engineering_up_axis() {
+        let m = [
+            2., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.5, 0., 0., 0., 0., 1.,
+        ];
+        let actual = super::transform_normal(m, super::unit([1., 1., 1.]));
+        let expected = super::unit([0.5, -2., 1.]);
+        for i in 0..3 {
+            assert!((actual[i] - expected[i]).abs() < 1e-10);
+        }
+    }
+    #[test]
+    fn studio_lighting_distinguishes_opposing_faces() {
+        assert_ne!(
+            super::lit_color([80, 140, 80], [0., 0., 1.], 1., 0.5),
+            super::lit_color([80, 140, 80], [0., 0., -1.], 1., 0.5)
+        );
+    }
     #[test]
     fn gltf_linear_materials_are_not_displayed_as_linear_bytes() {
         assert_eq!(super::linear_to_srgb(0.), 0);

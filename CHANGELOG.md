@@ -1,3 +1,9 @@
+# 0.8.2
+
+- 3D assemblies open in a separate window by default, with Home, Project and PCB ribbon navigation. Closing the assembly returns to the PCB; completed background loading no longer reopens a closed viewer.
+- Project PCB cards can open their assembly directly. Loading displays the actual native assembly when ready rather than a simplified placeholder board.
+- Imported GLB smooth normals survive node transforms, including nonuniform scale. Studio key/fill/rim lighting and a higher-resolution depth-buffered viewport improve component surfaces and silkscreen legibility.
+
 # 0.8.1
 
 - Darker, more physical PCB assembly presentation in the desktop 3D viewer, with restrained default brightness and ambient illumination for clearer solder-mask, copper and component contrast.

@@ -65,6 +65,8 @@ AI and human users can create simple native VRML component bodies. The footprint
 
 ## Views, file actions and PCB pages
 
+Assembly opens in a separate window by default. Its Home, Project and PCB ribbon buttons navigate explicitly; closing the window returns to the PCB without discarding edits. Each PCB card on the project dashboard also opens its 3D assembly directly. Dock as tab remains available. Native assembly loading runs in the background; a closed viewer stays closed when loading finishes. Imported smooth normals, directional studio lighting and a higher-resolution depth buffer preserve component shape and silkscreen detail; brightness and ambient controls remain adjustable.
+
 Both editors offer Save, Save As, Export and File Location. PCB Save As resolves project-relative component models against the original project so the new board retains its model links. The 3D ribbon offers seven standard camera views, current-view PNG/PDF, a seven-page PDF or PNG set, and STEP/GLB/STL/VRML/BREP/PLY assembly export. File Location opens the last exported assembly location or the board folder.
 
 Add PCB page creates another named independent physical board in the project. Pages switches boards after saving; Export all pages PDF creates a single review document. Automation uses `pcb_create_page`, `pcb_export_pages`, and `pcb_export_3d_view`. PCB pages remain separate `.kicad_pcb` files for native interoperability.
