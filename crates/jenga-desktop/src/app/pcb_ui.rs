@@ -1521,6 +1521,15 @@ fn paint_mesh_lit(
                 }
             }
             t.color.hash(&mut hash);
+            t.metallic.to_bits().hash(&mut hash);
+            t.roughness.to_bits().hash(&mut hash);
+            if let Some(normals) = t.normals {
+                for normal in normals {
+                    for value in normal {
+                        value.to_bits().hash(&mut hash);
+                    }
+                }
+            }
         }
         for n in [
             yaw,
