@@ -28,7 +28,7 @@ use std::{
     sync::mpsc,
 };
 
-const ACCENT: Color32 = Color32::from_rgb(225, 35, 43);
+const ACCENT: Color32 = Color32::from_rgb(239, 112, 35);
 #[derive(Clone, Copy, PartialEq)]
 enum Tool {
     Select,
@@ -133,13 +133,13 @@ impl App {
         style.spacing.item_spacing = Vec2::new(6., 5.);
         style.visuals.panel_fill = Color32::from_rgb(248, 247, 242);
         style.visuals.window_fill = Color32::from_rgb(252, 251, 247);
-        style.visuals.selection.bg_fill = Color32::from_rgb(250, 220, 218);
+        style.visuals.selection.bg_fill = Color32::from_rgb(255, 225, 188);
         style.visuals.override_text_color = Some(Color32::from_rgb(28, 32, 40));
         style.visuals.widgets.inactive.bg_fill = Color32::from_rgb(249, 248, 244);
         style.visuals.widgets.inactive.weak_bg_fill = Color32::from_rgb(249, 248, 244);
         style.visuals.widgets.inactive.bg_stroke =
             Stroke::new(1_f32, Color32::from_rgb(211, 210, 203));
-        style.visuals.widgets.hovered.bg_fill = Color32::from_rgb(250, 231, 228);
+        style.visuals.widgets.hovered.bg_fill = Color32::from_rgb(255, 237, 210);
         style.spacing.button_padding = Vec2::new(8., 4.);
         style
             .text_styles

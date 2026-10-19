@@ -1,5 +1,7 @@
 # 0.8.2
 
+- Brighter orange interface accents, selection and hover colors. Experimental native build/CLI smoke jobs cover Linux x64/ARM64, macOS Intel/Apple Silicon and Windows ARM64; these are not full offline installers.
+
 - 3D assemblies open in a separate window by default, with Home, Project and PCB ribbon navigation. Closing the assembly returns to the PCB; completed background loading no longer reopens a closed viewer.
 - Project PCB cards can open their assembly directly. Loading displays the actual native assembly when ready rather than a simplified placeholder board.
 - Imported GLB smooth normals survive node transforms, including nonuniform scale. Studio key/fill/rim lighting and a higher-resolution depth-buffered viewport improve component surfaces and silkscreen legibility.
