@@ -21,7 +21,7 @@ header{min-height:68px;padding-block:10px}.app-logo{width:40px;height:40px}main{
 .design-stage{background:#20242b;border-color:#11161b;box-shadow:inset 0 0 0 1px #ffffff0b,0 12px 28px #1118201f}.design-stage:before{content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 50% 15%,#4c56611c,transparent 42%),linear-gradient(160deg,#2a3038,#15191f)}model-viewer{background:radial-gradient(circle at 50% 20%,#4b535d 0,#292f37 42%,#171b21 100%);--progress-bar-color:#e17a31}.view-loading{position:absolute;inset:0;z-index:3;display:none;align-items:center;justify-content:center;gap:10px;color:#f6f1e6;background:#1b2028e8;font:12px ui-monospace,monospace;letter-spacing:.06em}.design-stage.loading .view-loading{display:flex}.view-loading-mark{width:18px;height:18px;border:2px solid #ffb77f;border-right-color:transparent;border-radius:50%;animation:view-spin .8s linear infinite}.design-stage.view-transition model-viewer,.design-stage.view-transition .image-viewport{animation:view-arrive .28s ease-out both}@keyframes view-spin{to{transform:rotate(1turn)}}@keyframes view-arrive{from{opacity:.38;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
 @media(max-width:720px){.hero-workflow{padding:12px}.tabs{overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:2px}.tabs button{flex:0 0 max-content;min-width:98px;scroll-snap-align:start}.design-stage{height:clamp(320px,54svh,430px);min-height:320px}.viewer-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.viewer-controls .asset-download{grid-column:1/-1}.viewer-controls button,.asset-download{min-height:42px}.design-dialog{width:100vw;max-width:none;max-height:100svh;min-height:100svh;border-radius:0;padding:14px}.design-dialog .design-stage{height:66svh;min-height:360px}.design-dialog .tabs{max-width:none}.viewer-status{min-height:42px}.design-image{max-width:130%;max-height:130%}}@media(max-width:420px){.design-stage{height:50svh;min-height:300px}.design-dialog .design-stage{height:61svh;min-height:320px}.tabs button{min-width:90px;font-size:10px}.view-loading{font-size:11px}}@media(prefers-reduced-motion:reduce){.view-loading-mark,.design-stage.view-transition model-viewer,.design-stage.view-transition .image-viewport{animation:none}}
 /* Warm paper, clean hierarchy and restrained motion inspired by Sparkfield. */
-:root{--paper:#f2efe5;--ink:#282b24;--muted:#606658;--orange:#c45827;--border:#d0d1c4}
+:root{--paper:#f8f4e9;--ink:#282b24;--muted:#606658;--orange:#ef7023;--red:#b94710;--border:#d0d1c4}
 body{font-size:16px;background:radial-gradient(ellipse at 80% 3%,#e7d9c55c,transparent 45%),var(--paper);-webkit-font-smoothing:antialiased}
 header{background:#f2efe5ed;backdrop-filter:blur(16px);border-bottom-color:#b7beaa80}
 header nav a{border-radius:999px;box-shadow:none;background:#fffdf466}
@@ -35,7 +35,7 @@ header nav .nav-download,.button.primary{background:#b84f22!important;border-col
 .feature-grid article:hover{transform:translateY(-3px);box-shadow:0 12px 26px #282b240a}
 .story{scroll-margin-top:110px}.build-story{background:#ffffff30;border-radius:8px;padding-inline:12px!important}
 .asset-download{border-radius:999px;background:#fffdf3;min-height:40px}
-.model-poster{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#354049,#191f25 80%)}
+.model-poster{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#354049,#191f25 80%)}
 .model-poster>img{width:100%;height:100%;object-fit:contain;opacity:.92;padding:8px 8px 72px}
 .poster-action{position:absolute;inset:auto 12px 14px;display:flex;flex-direction:column;align-items:center;gap:6px}
 .preview-kicker{font:10px ui-monospace,monospace;letter-spacing:1.6px;color:#f2dfc3}
@@ -57,3 +57,21 @@ header nav a:focus-visible{outline-offset:2px}header .wordmark{width:132px;min-w
 main{scroll-margin-top:130px}#projects,#features,#workflow,#downloads{scroll-margin-top:140px}
 @media(max-width:720px){header{top:6px;width:calc(100% - 24px);margin-top:8px;padding:8px 12px;gap:6px;border-radius:8px;flex-wrap:wrap}header.is-scrolled{border-radius:12px}header .brand{gap:8px}header .app-logo{width:32px;height:32px;border-radius:8px}header .wordmark{width:105px}header nav{order:2;width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;gap:5px;border-top:1px solid #cbd0bb;padding-top:6px;scrollbar-width:none}header nav::-webkit-scrollbar{display:none}header nav a{min-height:36px;flex:0 0 auto;white-space:nowrap;font-size:11px;padding:7px 10px;border-color:transparent;background:transparent}header nav .nav-download{position:sticky;right:0;margin-left:auto;z-index:1;box-shadow:-8px 0 12px #f2efe5;padding-inline:14px}.blueprint{opacity:.26}.orange-rain{opacity:.17}.landing{padding-top:4px}#projects,#features,#workflow,#downloads{scroll-margin-top:142px}.design-dialog{overscroll-behavior:contain}}
 @media(prefers-reduced-motion:reduce){header{transition:none}}
+/* Visible circuit signals and Jenga motifs stay behind the reading surface. */
+.circuit-field{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;opacity:.75;contain:strict}
+.circuit-field svg{width:100%;height:100%;display:block}
+.circuit-tracks{fill:none;stroke:#829073;stroke-width:1.25;opacity:.5}
+.circuit-flow{fill:none;stroke:#ef7023;stroke-width:3.8;stroke-linecap:round;stroke-dasharray:4 996;opacity:.95}
+.circuit-nodes{fill:#ef7023;opacity:.78}.circuit-marks{opacity:.17}
+.circuit-marks path{fill:none;stroke:#637354;stroke-width:1.5}
+html[data-motion=on] .circuit-flow path{animation:circuit-travel var(--travel) linear var(--phase) infinite}
+html[data-motion=on] .circuit-nodes{animation:circuit-breathe 5s ease-in-out infinite}
+.orange-rain{opacity:.36}.orange-rain i{opacity:.8}.blueprint{opacity:.4}
+header{background:#f2efe5e3}header.is-scrolled{background:#f3f0e7f2}
+.hero-workflow,.project-activity{background:#fffdf3eb}.feature-grid article{background:#fffcf3ed}
+@keyframes circuit-travel{to{stroke-dashoffset:-1000}}
+@keyframes circuit-breathe{50%{opacity:.35}}
+@media(max-width:720px){.circuit-field{opacity:.63}.circuit-field svg{width:160%;max-width:none;margin-left:-30%}.circuit-flow{stroke-width:3.3}.circuit-marks{opacity:.12}.orange-rain{opacity:.27}.blueprint{opacity:.32}header{background:#f2efe5ee}}
+@media(prefers-reduced-motion:reduce){.circuit-flow{display:none}.circuit-nodes{animation:none!important}.circuit-field{opacity:.48}}
+.button.primary,.nav-download{background:#ef7023!important;border-color:#d8611b!important;color:#24180e!important}.button.primary small{color:#422b18}.button.primary:hover,.nav-download:hover{background:#ff893f!important}.dot-title{background-image:radial-gradient(circle,#e76b24 1.4px,transparent 1.7px)}
+.platform-support{padding:24px 0 12px;border-top:1px solid var(--border);scroll-margin-top:100px}.platform-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0}.platform-grid article{padding:20px;border:1px solid var(--border);border-top:3px solid #ef7023;border-radius:12px;background:#fffdf5}.platform-grid h3{margin:0 0 10px;font-size:18px}.platform-grid strong{font-size:13px;color:#93400f}.platform-grid p{color:var(--muted);font-size:14px;line-height:1.6}.platform-grid a{font-weight:600;font-size:13px}@media(max-width:640px){.platform-grid{grid-template-columns:1fr}.platform-grid article{padding:17px}}

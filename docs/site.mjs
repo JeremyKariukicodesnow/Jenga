@@ -10,6 +10,9 @@ projects.sort((a,b)=>['pulse-generator','access-terminal','maize-factory'].index
 projects[0].title='5 V · 555 pulse generator';
 projects[1].tag='02 / BRING THE INTERFACES TOGETHER';
 projects[2].tag='03 / THINK IN SYSTEMS';
+// Detailed native re-exports include board surfaces and silkscreen. Original
+// legacy GLBs remain available at their original URLs.
+for(const project of projects)for(const view of project.views)if(view[1].endsWith('.glb'))view[2]=view[1].replace('.glb','-assembly.glb');
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text)n.textContent=text;return n;}
 function download(file,label){const a=el('a','asset-download',label);a.href=new URL(file,base);a.download=file;return a;}
 const dialog=el('dialog','design-dialog'),close=el('button','dialog-close','Close ×'),modalBody=el('div','dialog-body');dialog.setAttribute('aria-label','Enlarged project view');dialog.append(close,modalBody);document.body.append(dialog);let restore=null;
@@ -26,26 +29,27 @@ loader.setAttribute('aria-hidden','true');loader.append(el('span','view-loading-
 const image=el('img','design-image'),imagePanel=el('div','image-viewport');image.alt=project.title;image.draggable=false;image.decoding='async';imagePanel.append(image);const zoom=imageControls(imagePanel,image);
 const poster=el('div','model-poster'),posterImage=el('img'),posterAction=el('div','poster-action'),load=el('button','load-model','Load interactive 3D ↗');
 poster.hidden=true;posterImage.alt=`${project.title} — static 3D preview`;posterImage.decoding='async';posterImage.width=960;posterImage.height=600;
-posterAction.append(el('span','preview-kicker','ASSEMBLY PREVIEW'),load,el('span','preview-size',project.id==='access-terminal'?'Interactive model · 10.2 MB':'Interactive model · 1.5 MB'));poster.append(posterImage,posterAction);
-const model=el('model-viewer');for(const [k,v]of Object.entries({'camera-controls':'','touch-action':'pan-y','environment-image':'neutral',exposure:'.72','shadow-intensity':'.82','rotation-per-second':'10deg','interaction-prompt':'none',alt:`${project.title} interactive 3D assembly`}))model.setAttribute(k,v);model.hidden=true;
+posterAction.append(el('span','preview-kicker','ASSEMBLY PREVIEW'),load,el('span','preview-size',project.id==='access-terminal'?'Optimized interactive model · 6.7 MB':'Optimized interactive model · 1.2 MB'));poster.append(posterImage,posterAction);
+const model=el('model-viewer');for(const [k,v]of Object.entries({loading:'eager','camera-controls':'','touch-action':'pan-y','environment-image':'neutral',exposure:'.72','shadow-intensity':'.82','rotation-per-second':'10deg','interaction-prompt':'none',alt:`${project.title} interactive 3D assembly`}))model.setAttribute(k,v);model.hidden=true;
 let request=0,active3d=false,modelPending=false;
 const finish=()=>{stage.classList.remove('loading');stage.setAttribute('aria-busy','false');};
 const instructions='Drag to orbit · pinch/wheel to zoom · Shift-drag or two fingers to pan';
 const showModel=()=>{poster.hidden=true;imagePanel.hidden=true;model.hidden=false;rotate.hidden=false;status.textContent=instructions;finish();};
 model.addEventListener('load',()=>{modelPending=false;load.disabled=false;load.textContent='Load interactive 3D ↗';if(active3d)showModel();});
 model.addEventListener('error',()=>{modelPending=false;load.disabled=false;load.textContent='Retry interactive 3D ↗';if(active3d){model.hidden=true;poster.hidden=false;status.textContent='Interactive view unavailable. Retry or download the full-quality GLB.';finish();}});
+model.addEventListener('progress',event=>{if(!modelPending)return;const percent=Math.round((event.detail?.totalProgress??0)*100);load.textContent=percent<100?`Loading 3D · ${percent}%`:'Preparing 3D…';if(active3d)status.textContent=`Loading assembly · ${percent}% · preview remains available`;});
 stage.append(imagePanel,model,poster,loader);
 const expand=el('button','','Enlarge ⤢');expand.onclick=()=>enlarge(wrap,expand);
 const reset=el('button','','Reset view');reset.onclick=()=>{zoom.reset();model.cameraOrbit='0deg 65deg auto';model.cameraTarget='auto auto auto';model.fieldOfView='auto';model.resetTurntableRotation?.();};
 const plus=el('button','','Zoom +'),minus=el('button','','Zoom −');plus.onclick=()=>zoom.zoom(1.4);minus.onclick=()=>zoom.zoom(1/1.4);
 const rotate=el('button','','Rotate model');rotate.hidden=true;rotate.onclick=()=>{model.toggleAttribute('auto-rotate');rotate.textContent=model.hasAttribute('auto-rotate')?'Stop rotation':'Rotate model';};
 const current=el('a','asset-download');current.download='';controls.append(expand,reset,plus,minus,rotate,current);
-load.onclick=async()=>{if(modelPending)return;modelPending=true;load.disabled=true;load.textContent='Loading interactive 3D…';status.textContent='Loading the full assembly. The preview stays visible.';try{await loadViewer();const file=project.views.find(([,file])=>file.endsWith('.glb'))[1];model.src=new URL(file,base).href;if(model.loaded&&active3d)showModel();}catch{modelPending=false;load.disabled=false;load.textContent='Retry interactive 3D ↗';if(active3d)status.textContent='Viewer could not load. Retry or download the full-quality GLB.';}};
+load.onclick=async()=>{if(modelPending)return;modelPending=true;load.disabled=true;load.textContent='Loading interactive 3D…';status.textContent='Loading the optimized assembly. The preview stays visible.';try{await loadViewer();const file=project.views.find(([,file])=>file.endsWith('.glb'))[1].replace('.glb','-web.glb');model.hidden=!active3d;model.src=new URL(file,base).href;if(model.loaded&&active3d)showModel();}catch{modelPending=false;load.disabled=false;load.textContent='Retry interactive 3D ↗';if(active3d)status.textContent='Viewer could not load. Retry or download the full-quality GLB.';}};
 async function choose(index){
 const token=++request,[label,file,native]=project.views[index];active3d=file.endsWith('.glb');for(const [i,b]of [...tabs.children].entries())b.setAttribute('aria-pressed',String(i===index));
 current.href=new URL(native,base);current.download=native;current.textContent=active3d?'Full-quality GLB ↓':`Download ${native.endsWith('kicad_pcb')?'PCB':'schematic'} ↓`;
 plus.hidden=minus.hidden=active3d;rotate.hidden=true;model.removeAttribute('auto-rotate');rotate.textContent='Rotate model';stage.classList.remove('view-transition');requestAnimationFrame(()=>stage.classList.add('view-transition'));
-if(active3d){imagePanel.hidden=true;if(model.loaded){showModel();return;}model.hidden=true;poster.hidden=false;if(!posterImage.hasAttribute('src'))posterImage.src=new URL(project.id==='access-terminal'?'terminal-poster.webp':'555-poster.webp',base).href;status.textContent=modelPending?'Loading interactive 3D…':'Lightweight preview · tap to load interactive 3D · full-quality download below';finish();return;}
+if(active3d){imagePanel.hidden=true;if(model.loaded){showModel();return;}model.hidden=!modelPending;poster.hidden=false;if(!posterImage.hasAttribute('src'))posterImage.src=new URL(project.id==='access-terminal'?'terminal-poster.webp':'555-poster.webp',base).href;status.textContent=modelPending?'Loading interactive 3D…':'Lightweight preview · tap to load interactive 3D · full-quality download below';finish();return;}
 poster.hidden=true;model.hidden=true;status.textContent=`Preparing ${label.toLowerCase()}…`;stage.classList.add('loading');stage.setAttribute('aria-busy','true');
 const preload=new Image();preload.src=new URL(file,base);try{await preload.decode();if(token!==request)return;image.src=preload.src;image.alt=`${project.title} — ${label}`;zoom.reset();imagePanel.hidden=false;status.textContent='Enlarge to inspect · zoom with buttons or wheel · drag to pan';}catch{if(token===request)status.textContent='Preview unavailable. Download the native file below.';}finally{if(token===request)finish();}
 }
