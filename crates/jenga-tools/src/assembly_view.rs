@@ -160,7 +160,27 @@ pub fn raster_lit(
 
         let n = unit(cross(sub(v[1], v[0]), sub(v[2], v[0])));
 
-        let color = Rgb(jenga_core::mesh::lit_color(t.color, n, exposure, ambient));
+        let colors = t.normals.unwrap_or([n; 3]).map(|normal| {
+            let normal = if t.normals.is_some() {
+                let a = normal[0] * yaw.cos() - normal[1] * yaw.sin();
+                let b = normal[0] * yaw.sin() + normal[1] * yaw.cos();
+                [
+                    a,
+                    b * pitch.sin() + normal[2] * pitch.cos(),
+                    b * pitch.cos() - normal[2] * pitch.sin(),
+                ]
+            } else {
+                normal
+            };
+            jenga_core::mesh::lit_material(
+                t.color,
+                normal,
+                exposure,
+                ambient,
+                t.metallic,
+                t.roughness,
+            )
+        });
 
         for y in y0..y1 {
             for x in x0..x1 {
@@ -183,7 +203,17 @@ pub fn raster_lit(
                 if z < depths[i] {
                     depths[i] = z;
 
-                    out.put_pixel(x, y, color);
+                    out.put_pixel(
+                        x,
+                        y,
+                        Rgb(std::array::from_fn(|i| {
+                            (a * colors[0][i] as f64
+                                + b * colors[1][i] as f64
+                                + c * colors[2][i] as f64)
+                                .round()
+                                .clamp(0., 255.) as u8
+                        })),
+                    );
                 }
             }
         }

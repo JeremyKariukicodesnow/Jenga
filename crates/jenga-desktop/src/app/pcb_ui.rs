@@ -103,7 +103,7 @@ impl Default for PcbUi {
             preview_dialog: false,
             preview_texture: None,
             show_3d: false,
-            viewer_mode: "tab".into(),
+            viewer_mode: "window".into(),
             pending_id: None,
             jobs_open: false,
             jobs_cache: None,
@@ -299,7 +299,6 @@ impl App {
                     }
                     if job.method == "pcb_3d" {
                         self.pcb.mesh = job.mesh.take();
-                        self.pcb.show_3d = true;
                     }
                 }
             }
@@ -349,6 +348,8 @@ impl App {
         p["actor"] = json!("user");
         if let Err(e) = self.start_pcb_worker(method, &p, ctx) {
             self.fail(e);
+        } else if method == "pcb_3d" {
+            self.pcb.show_3d = true;
         }
     }
     pub(super) fn save_pcb(&mut self) -> bool {
@@ -1235,9 +1236,50 @@ impl App {
                 }
             },
         );
-        self.pcb.show_3d &= open;
+        if !open {
+            self.pcb.show_3d = false;
+            self.pcb.fullscreen_3d = false;
+            self.pcb.active = self.pcb.board.is_some();
+            self.workspace_ui.show = false;
+        }
     }
     pub(super) fn assembly_content(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
+        let mut destination = None;
+        ui.horizontal_wrapped(|ui| {
+            for (label, icon) in [("Home", "home"), ("Project", "folder"), ("PCB", "wire")] {
+                if crate::design::button(ui, label, icon, false).clicked() {
+                    destination = Some(label);
+                }
+            }
+            ui.separator();
+            ui.heading("3D assembly");
+        });
+        if let Some(destination) = destination {
+            if destination == "Home" && !self.may_replace() {
+                return;
+            }
+            self.pcb.show_3d = false;
+            self.pcb.fullscreen_3d = false;
+            match destination {
+                "Home" => {
+                    self.doc = None;
+                    self.pcb.board = None;
+                    self.pcb.active = false;
+                    self.workspace_ui.show = false;
+                }
+                "Project" => {
+                    self.workspace_ui.root = self.pcb.board.as_ref().and_then(|b| b.path.clone());
+                    self.workspace_ui.show = true;
+                    self.workspace_ui.reset_scroll = true;
+                }
+                _ => {
+                    self.pcb.active = self.pcb.board.is_some();
+                    self.workspace_ui.show = false;
+                }
+            }
+            return;
+        }
+        ui.separator();
         if self.pcb.mesh.is_none() && self.pcb.pending.is_none() && !self.pcb.auto_mesh_requested {
             self.pcb.auto_mesh_requested = true;
             self.pcb_job("pcb_3d", json!({}), ctx);
@@ -1283,10 +1325,8 @@ impl App {
                     }
                 }
             });
-            if ui.button("Back to PCB").clicked() {
-                self.pcb.show_3d = false;
-                self.pcb.active = true;
-                self.workspace_ui.show = false;
+            if crate::design::button(ui, "Save PCB", "save", false).clicked() {
+                self.save_pcb();
             }
             if ui
                 .button(if self.pcb.viewer_mode == "tab" {
@@ -1370,12 +1410,7 @@ impl App {
                 ui.label("All component models available · mechanical holes need no model");
             }
         }
-        let fallback = if self.pcb.mesh.is_none() {
-            self.pcb.board.as_ref().map(Mesh::board_basic)
-        } else {
-            None
-        };
-        if let Some(mesh) = self.pcb.mesh.as_ref().or(fallback.as_ref()) {
+        if let Some(mesh) = self.pcb.mesh.as_ref() {
             for w in &mesh.warnings {
                 ui.label(w);
             }
@@ -1411,7 +1446,11 @@ impl App {
                 self.pcb.ambient,
             );
         } else {
-            ui.label("Open a PCB to view its assembly.");
+            ui.label(if self.pcb.board.is_some() {
+                "Full assembly is not loaded. Use Load / refresh full assembly to retry."
+            } else {
+                "Open a PCB to view its assembly."
+            });
         }
     }
 }
@@ -1482,6 +1521,15 @@ fn paint_mesh_lit(
                 }
             }
             t.color.hash(&mut hash);
+            t.metallic.to_bits().hash(&mut hash);
+            t.roughness.to_bits().hash(&mut hash);
+            if let Some(normals) = t.normals {
+                for normal in normals {
+                    for value in normal {
+                        value.to_bits().hash(&mut hash);
+                    }
+                }
+            }
         }
         for n in [
             yaw,
@@ -1505,12 +1553,22 @@ fn paint_mesh_lit(
             let _ = old;
             texture
         } else {
-            let factor = (1200. / rect.width())
-                .min(900. / rect.height())
-                .clamp(0.01, 1.);
+            let factor = (1920. / rect.width())
+                .min(1440. / rect.height())
+                .clamp(0.01, ui.ctx().pixels_per_point().max(1.));
             let width = (rect.width() * factor).round().max(1.) as usize;
             let height = (rect.height() * factor).round().max(1.) as usize;
-            let mut pixels = vec![Color32::from_rgb(29, 34, 41); width * height];
+            let mut pixels: Vec<_> = (0..height)
+                .flat_map(|y| {
+                    let t = y as f32 / height.max(1) as f32;
+                    let c = Color32::from_rgb(
+                        (52. - 26. * t) as u8,
+                        (59. - 28. * t) as u8,
+                        (68. - 29. * t) as u8,
+                    );
+                    std::iter::repeat_n(c, width)
+                })
+                .collect();
             let mut depths = vec![f64::INFINITY; width * height];
             let edge = |a: [f64; 2], b: [f64; 2], p: [f64; 2]| {
                 (p[0] - a[0]) * (b[1] - a[1]) - (p[1] - a[1]) * (b[0] - a[0])
@@ -1557,8 +1615,27 @@ fn paint_mesh_lit(
                     jenga_core::mesh::sub(v[1], v[0]),
                     jenga_core::mesh::sub(v[2], v[0]),
                 ));
-                let c = jenga_core::mesh::lit_color(t.color, n, brightness, ambient);
-                let color = Color32::from_rgb(c[0], c[1], c[2]);
+                let colors = t.normals.unwrap_or([n; 3]).map(|normal| {
+                    let normal = if t.normals.is_some() {
+                        let a = normal[0] * yaw.cos() - normal[1] * yaw.sin();
+                        let b = normal[0] * yaw.sin() + normal[1] * yaw.cos();
+                        [
+                            a,
+                            b * pitch.sin() + normal[2] * pitch.cos(),
+                            b * pitch.cos() - normal[2] * pitch.sin(),
+                        ]
+                    } else {
+                        normal
+                    };
+                    jenga_core::mesh::lit_material(
+                        t.color,
+                        normal,
+                        brightness,
+                        ambient,
+                        t.metallic,
+                        t.roughness,
+                    )
+                });
                 for y in y0..y1 {
                     for x in x0..x1 {
                         let at = [x as f64 + 0.5, y as f64 + 0.5];
@@ -1572,7 +1649,14 @@ fn paint_mesh_lit(
                         let index = y * width + x;
                         if depth < depths[index] {
                             depths[index] = depth;
-                            pixels[index] = color;
+                            let color: [u8; 3] = std::array::from_fn(|i| {
+                                (a * colors[0][i] as f64
+                                    + b * colors[1][i] as f64
+                                    + c * colors[2][i] as f64)
+                                    .round()
+                                    .clamp(0., 255.) as u8
+                            });
+                            pixels[index] = Color32::from_rgb(color[0], color[1], color[2]);
                         }
                     }
                 }

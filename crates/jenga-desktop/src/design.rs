@@ -153,7 +153,7 @@ pub fn pattern(ui: &egui::Ui, rect: egui::Rect) {
         p.circle_filled(
             vertices[((time * 1.1) as usize + block) % 8],
             2.1,
-            Color32::from_rgb(225, 35, 43),
+            Color32::from_rgb(239, 112, 35),
         );
     }
     // Distributed waves and travelling nodes across the whole Home surface.
@@ -182,7 +182,7 @@ pub fn pattern(ui: &egui::Ui, rect: egui::Rect) {
         p.circle_filled(
             Pos2::new(x + (end - x) * travel, y),
             2.,
-            Color32::from_rgba_unmultiplied(225, 35, 43, 100),
+            Color32::from_rgba_unmultiplied(239, 112, 35, 120),
         );
     }
     let origin = rect.right_top() + Vec2::new(-75., 35.);
@@ -213,7 +213,7 @@ pub fn pattern(ui: &egui::Ui, rect: egui::Rect) {
         p.circle_filled(
             origin + Vec2::new(start.cos(), start.sin()) * radius,
             2.,
-            Color32::from_rgb(225, 35, 43),
+            Color32::from_rgb(239, 112, 35),
         );
     }
     for row in 0..4 {
@@ -240,7 +240,7 @@ pub fn pattern(ui: &egui::Ui, rect: egui::Rect) {
                 y - 20.,
             )
         };
-        p.circle_filled(pos, 1.6, Color32::from_rgb(225, 35, 43));
+        p.circle_filled(pos, 1.6, Color32::from_rgb(239, 112, 35));
     }
     ui.ctx()
         .request_repaint_after(std::time::Duration::from_millis(40));
@@ -267,7 +267,7 @@ pub fn button(ui: &mut egui::Ui, label: &str, icon: &str, selected: bool) -> egu
             .rect_filled(rect, 5., Color32::from_rgb(249, 221, 217));
     }
     let c = if selected {
-        Color32::from_rgb(225, 35, 43)
+        Color32::from_rgb(239, 112, 35)
     } else {
         Color32::from_rgb(30, 35, 44)
     };
