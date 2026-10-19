@@ -10,6 +10,8 @@ pub struct Triangle {
     pub color: [u8; 3],
     /// Imported smooth normals, in the same Z-up coordinate system as vertices.
     pub normals: Option<[V3; 3]>,
+    pub metallic: f64,
+    pub roughness: f64,
     pub object: Option<String>,
 }
 #[derive(Clone, Default, Debug)]
@@ -86,6 +88,8 @@ impl Mesh {
                 vertices: [v[f[0]], v[f[1]], v[f[2]]],
                 color,
                 normals: None,
+                metallic: 0.,
+                roughness: 0.7,
                 object: object.clone(),
             });
         }
@@ -144,6 +148,8 @@ impl Mesh {
                     vertices: v,
                     color: [145, 150, 155],
                     normals: None,
+                    metallic: 0.,
+                    roughness: 0.7,
                     object: None,
                 });
             }
@@ -166,6 +172,8 @@ impl Mesh {
                     vertices: [v[0], v[1], v[2]],
                     color: [145, 150, 155],
                     normals: None,
+                    metallic: 0.,
+                    roughness: 0.7,
                     object: None,
                 });
             }
@@ -208,6 +216,8 @@ impl Mesh {
                         vertices: [vertices[idx[0]], vertices[idx[j]], vertices[idx[j + 1]]],
                         color: [145, 150, 155],
                         normals: None,
+                        metallic: 0.,
+                        roughness: 0.7,
                         object: None,
                     });
                 }
@@ -432,20 +442,36 @@ impl Mesh {
                             // glTF is right-handed Y-up; engineering meshes use Z-up.
                             v[j] = [v[j][0], -v[j][2], v[j][1]];
                         }
-                        m.triangles.push(Triangle {
-                            vertices: v,
-                            color,
-                            normals: normals.as_ref().map(|normals| {
-                                let mut result = [[0.; 3]; 3];
-                                for j in 0..3 {
-                                    if let Some(n) = normals.get(idx[j]).filter(|n| n.len() == 3) {
-                                        result[j] = transform_normal(mat, [n[0], n[1], n[2]]);
+                        m.triangles.push(
+                            Triangle {
+                                vertices: v,
+                                color,
+                                normals: normals.as_ref().map(|normals| {
+                                    let mut result = [[0.; 3]; 3];
+                                    for j in 0..3 {
+                                        if let Some(n) =
+                                            normals.get(idx[j]).filter(|n| n.len() == 3)
+                                        {
+                                            result[j] = transform_normal(mat, [n[0], n[1], n[2]]);
+                                        }
                                     }
-                                }
-                                result
-                            }),
-                            object: n["name"].as_str().map(str::to_owned),
-                        });
+                                    result
+                                }),
+                                object: n["name"].as_str().map(str::to_owned),
+                                metallic:
+                                    root["materials"][p["material"].as_u64().unwrap_or(0) as usize]
+                                        ["pbrMetallicRoughness"]["metallicFactor"]
+                                        .as_f64()
+                                        .unwrap_or(1.)
+                                        .clamp(0., 1.),
+                                roughness:
+                                    root["materials"][p["material"].as_u64().unwrap_or(0) as usize]
+                                        ["pbrMetallicRoughness"]["roughnessFactor"]
+                                        .as_f64()
+                                        .unwrap_or(1.)
+                                        .clamp(0.04, 1.),
+                            },
+                        );
                         ensure!(
                             m.triangles.len() <= 2_000_000,
                             "GLB exceeds two million triangles"
@@ -556,6 +582,19 @@ pub fn linear_to_srgb(c: f64) -> u8 {
         .round() as u8
 }
 pub fn lit_color(color: [u8; 3], normal: [f64; 3], exposure: f64, ambient: f64) -> [u8; 3] {
+    lit_material(color, normal, exposure, ambient, 0., 0.7)
+}
+
+/// Bounded studio shading with glTF metal/roughness and smooth vertex normals.
+/// This is a preview shader, not a path-traced manufacturing/material simulation.
+pub fn lit_material(
+    color: [u8; 3],
+    normal: V3,
+    exposure: f64,
+    ambient: f64,
+    metallic: f64,
+    roughness: f64,
+) -> [u8; 3] {
     // Studio key, fill and rim lights. Opposing faces must not receive the
     // identical light produced by the previous absolute dot product.
     let n = unit(normal);
@@ -572,7 +611,10 @@ pub fn lit_color(color: [u8; 3], normal: [f64; 3], exposure: f64, ambient: f64) 
         } else {
             ((c + 0.055) / 1.055).powf(2.4)
         };
-        linear_to_srgb(linear * light * exposure)
+        let half = unit([0.3, -0.4, -1.85]);
+        let specular = dot(half).powf(2. / roughness.clamp(0.08, 1.).powi(2)) * 0.35;
+        let reflectance = 0.04 * (1. - metallic) + linear * metallic;
+        linear_to_srgb((linear * light + specular * reflectance) * exposure)
     })
 }
 #[cfg(test)]

@@ -1618,7 +1618,14 @@ fn paint_mesh_lit(
                     } else {
                         normal
                     };
-                    jenga_core::mesh::lit_color(t.color, normal, brightness, ambient)
+                    jenga_core::mesh::lit_material(
+                        t.color,
+                        normal,
+                        brightness,
+                        ambient,
+                        t.metallic,
+                        t.roughness,
+                    )
                 });
                 for y in y0..y1 {
                     for x in x0..x1 {

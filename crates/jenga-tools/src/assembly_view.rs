@@ -172,7 +172,14 @@ pub fn raster_lit(
             } else {
                 normal
             };
-            jenga_core::mesh::lit_color(t.color, normal, exposure, ambient)
+            jenga_core::mesh::lit_material(
+                t.color,
+                normal,
+                exposure,
+                ambient,
+                t.metallic,
+                t.roughness,
+            )
         });
 
         for y in y0..y1 {
