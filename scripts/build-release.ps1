@@ -115,7 +115,17 @@ foreach ($name in @('crates','scripts','packaging','docs','.cargo','.github','re
         Copy-Item -LiteralPath 'resources\DEPENDENCIES.txt' -Destination "$sourceDir\resources" -Force
         New-Item -ItemType Directory -Force -Path "$sourceDir\resources\backend\kicad" | Out-Null
         foreach ($notice in @('COPYRIGHT.txt','SOURCE_AND_LICENSES.txt','NOTICES-SOURCES.zip')) {Copy-Item -LiteralPath "resources\backend\kicad\$notice" -Destination "$sourceDir\resources\backend\kicad" -Force}
-    } else {Copy-Item -LiteralPath $name -Destination $sourceDir -Recurse -Force}
+    } else {
+        # Publish repository sources only. Recursive directory copies also pick
+        # up ignored local environment files and deployment credentials.
+        $tracked = & git -c core.quotepath=false ls-files -- $name
+        if ($LASTEXITCODE -ne 0) {throw 'Could not enumerate tracked release sources'}
+        foreach ($relative in $tracked) {
+            $destination = Join-Path $sourceDir $relative
+            New-Item -ItemType Directory -Force -Path (Split-Path $destination -Parent) | Out-Null
+            Copy-Item -LiteralPath $relative -Destination $destination -Force
+        }
+    }
 }
 foreach ($file in @('Cargo.toml','Cargo.lock','LICENSE','README.md','THIRD_PARTY_NOTICES.md','CHANGELOG.md','.gitignore')) {Copy-Item -LiteralPath $file -Destination $sourceDir -Force}
 $sourceZip = Join-Path $releaseDir "Jenga-$version-source.zip"
