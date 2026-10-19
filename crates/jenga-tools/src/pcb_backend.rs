@@ -368,7 +368,7 @@ pub fn mesh_revision(board: &Board) -> String {
         })
         .collect();
     jenga_core::pcb::revision_text(
-        &json!({"board":board.revision(),"file":board.path,"models":stamps}).to_string(),
+        &json!({"assembly_recipe":"0.8.2-surfaces-silkscreen-vias","board":board.revision(),"file":board.path,"models":stamps}).to_string(),
     )
 }
 pub fn footprint_mesh(
